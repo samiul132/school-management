@@ -1,0 +1,324 @@
+/* resources/css/app.css */
+
+/* Tailwind base / preflight */
+@import "tailwindcss";
+/* Tailwind utilities (all default utilities) */
+@tailwind utilities;
+
+/* Custom components */
+@layer components {
+  .btn-custom {
+    @apply px-4 py-2 bg-blue-500 text-white rounded-lg;
+  }
+}
+
+
+
+
+/* Print Styles - Global */
+@media print {
+  /* Hide all navigation and UI elements */
+  .no-print,
+  header,
+  nav,
+  aside,
+  footer,
+  button,
+  .sidebar,
+  .topbar,
+  .navbar,
+  .breadcrumb,
+  [role="navigation"],
+  [class*="sidebar"],
+  [class*="topbar"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Remove all margins and padding */
+  body,
+  html {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+  
+  /* Full width for print */
+  main,
+  .main-content,
+  [class*="ml-"],
+  [class*="px-"],
+  [class*="pt-"],
+  [class*="pb-"] {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .max-w-7xl,
+  .max-w-4xl {
+    max-width: 100% !important;
+  }
+  
+  /* Remove any transitions */
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+@page {
+  margin: 0.5cm;
+  size: A4 portrait;
+}
+
+@media print {
+  /* Hide browser's default header/footer */
+  body {
+    margin: 0;
+  }
+}
+
+
+/* vue-select styling */
+
+.vs__dropdown-option {
+  padding: 4px 12px !important;
+}
+.vs__dropdown-toggle {
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.5rem !important;
+  padding: 6px 10px !important;
+  min-height: 40px !important;
+}
+
+.vs__search {
+  color: #111827 !important; 
+  background-color: white !important;
+}
+
+.vs__search::placeholder {
+  color: #9ca3af !important;
+}
+
+.vs__dropdown-menu {
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-top: 4px;
+}
+
+.vs__dropdown-option {
+  color: #111827 !important; /* Black text */
+  background-color: white;
+}
+
+.vs__dropdown-option--highlight {
+  background-color: #3b82f6;
+  color: white !important;
+}
+
+/*
+.vs__dropdown-option--selected {
+  background-color: #2469f2;
+  color: #111827 !important;
+}
+*/
+.vs__selected {
+  background-color: #3b82f6;
+  color: rgb(0, 0, 0);
+}
+
+/* FIX: Ensure all text in options is black by default */
+.vs__dropdown-option * {
+  color: #111827 !important;
+}
+
+/* FIX: But highlight should be white */
+.vs__dropdown-option--highlight * {
+  color: white !important;
+}
+
+/* Specific fix for your template classes */
+.vs__dropdown-option .font-medium {
+  color: #111827 !important;
+}
+
+.vs__dropdown-option .text-sm {
+  color: #6b7280 !important;
+}
+
+.vs__dropdown-option--highlight .font-medium {
+  color: white !important;
+}
+
+.vs__dropdown-option--highlight .text-sm {
+  color: #e5e7eb !important;
+}
+
+
+/* Topbar and Sidebar Start */
+/* Transition classes for backdrop and dropdown */
+.backdrop-enter-active,
+.backdrop-leave-active {
+  transition: opacity 0.3s ease;
+}
+.backdrop-enter-from,
+.backdrop-leave-to {
+  opacity: 0;
+}
+
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.2s ease;
+}
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Custom Scrollbar for navigation */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+/* CRITICAL FIX: Sidebar and Navigation Structure */
+/* Sidebar container - allow tooltips to overflow */
+aside {
+  overflow: visible !important;
+}
+
+/* Navigation - scrollable vertically ONLY but allow tooltip overflow */
+nav.custom-scrollbar {
+  overflow-y: auto !important;
+  overflow-x: visible !important;
+  position: relative;
+  padding-right: 8px;
+}
+
+/* Parent containers - allow tooltip overflow */
+nav.custom-scrollbar > div,
+.relative,
+.admission-item,
+.dashboard-container,
+.dropdown-item {
+  position: relative;
+  overflow: visible !important;
+}
+
+/* TOOLTIP SYSTEM - FIXED VERSION */
+.tooltip-wrapper {
+  position: fixed;
+  z-index: 99999;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  white-space: nowrap;
+}
+
+/* Show tooltip on hover */
+.admission-item:hover .tooltip-wrapper,
+.dropdown-item:hover .tooltip-wrapper,
+.dashboard-container:hover .tooltip-wrapper.main-tooltip {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Tooltip Content Styling */
+.tooltip-content {
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  position: relative;
+  backdrop-filter: blur(8px);
+}
+
+/* Tooltip Arrow - pointing left */
+.tooltip-content::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent;
+  border-right-color: rgba(0, 0, 0, 0.9);
+}
+
+/* Dark mode tooltip */
+.dark .tooltip-content {
+  background: rgba(255, 255, 255, 0.95);
+  color: #1f2937;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark .tooltip-content::before {
+  border-right-color: rgba(255, 255, 255, 0.95);
+}
+
+/* Topbar and Sidebar End */
+
+/* Custom styles */
+body {
+  font-family: system-ui, sans-serif;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.fixed-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+}
+
+.main-content {
+  margin-top: 80px; 
+}
+
+.topbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 30 !important;
+  background: white !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.sidebar-backdrop {
+  z-index: 40 !important;
+}
+
+.sidebar {
+  z-index: 50 !important;
+}
+
+.main-content {
+  position: relative;
+  z-index: 10;
+}
+
+/* Ensure all parent containers don't clip tooltips */
+.sidebar-container * {
+  overflow: visible !important;
+}

@@ -1,0 +1,49 @@
+{
+    "$schema": "https://json.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite"
+    },
+    "devDependencies": {
+        "@tailwindcss/postcss": "^4.1.17",
+        "@tailwindcss/vite": "^4.0.0",
+        "@types/vue-select": "^3.16.8",
+        "autoprefixer": "^10.4.21",
+        "axios": "^1.13.2",
+        "concurrently": "^9.0.1",
+        "laravel-vite-plugin": "^2.0.0",
+        "postcss": "^8.5.6",
+        "tailwindcss": "^4.1.17",
+        "vite": "^7.2.2"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome-free": "^7.1.0",
+        "@vitejs/plugin-vue": "^6.0.1",
+        "@vueuse/core": "^14.1.0",
+        "bootstrap-icons": "^1.13.1",
+        "boxicons": "^2.1.4",
+        "chart.js": "^4.5.1",
+        "dropify": "^0.2.2",
+        "jquery": "^3.7.1",
+        "lucide-vue-next": "^0.553.0",
+        "pinia": "^3.0.4",
+        "quill": "^2.0.3",
+        "sweetalert2": "^11.26.3",
+        "vue": "^3.5.24",
+        "vue-chartjs": "^5.3.3",
+        "vue-router": "^4.6.3",
+        "vue-select": "^4.0.0-beta.6"
+    },
+    "name": "my-app",
+    "version": "1.0.0",
+    "description": "<p align=\"center\"><a href=\"https://laravel.com\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg\" width=\"400\" alt=\"Laravel Logo\"></a></p>",
+    "main": "vite.config.js",
+    "directories": {
+        "test": "tests"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+}
