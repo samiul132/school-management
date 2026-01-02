@@ -301,9 +301,28 @@ class PaymentController extends Controller
                 'classWiseStudent.version',
                 'classWiseStudent.section',
                 'month',
-                'account',
-                'paymentDetails.feeHead'
+                'account'
             ])->findOrFail($id);
+
+            $groupedDetails = PaymentDetails::where('payment_id', $id)
+                ->join('fee_heads', 'payment_details.head_id', '=', 'fee_heads.id')
+                ->selectRaw('
+                    payment_details.head_id,
+                    fee_heads.head_name,
+                    SUM(payment_details.paid_amount) as paid_amount
+                ')
+                ->groupBy('payment_details.head_id', 'fee_heads.head_name')
+                ->get();
+
+            $payment->payment_details = $groupedDetails->map(function($detail) {
+                return [
+                    'head_id' => $detail->head_id,
+                    'paid_amount' => $detail->paid_amount,
+                    'fee_head' => [
+                        'head_name' => $detail->head_name
+                    ]
+                ];
+            });
 
             return response()->json([
                 'success' => true,
@@ -318,6 +337,34 @@ class PaymentController extends Controller
             ], 404);
         }
     }
+
+    // public function show($id)
+    // {
+    //     try {
+    //         $payment = Payment::with([
+    //             'classWiseStudent.student',
+    //             'classWiseStudent.session',
+    //             'classWiseStudent.class',
+    //             'classWiseStudent.version',
+    //             'classWiseStudent.section',
+    //             'month',
+    //             'account',
+    //             'paymentDetails.feeHead'
+    //         ])->findOrFail($id);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'data' => $payment
+    //         ], 200);
+
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Payment not found',
+    //             'error' => $e->getMessage()
+    //         ], 404);
+    //     }
+    // }
 
     public function update(Request $request, $id)
     {

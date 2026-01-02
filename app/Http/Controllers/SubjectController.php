@@ -90,7 +90,7 @@ class SubjectController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update subsubjectsidiary'
+                'message' => 'Failed to update subject'
             ], 500);
         }
     }

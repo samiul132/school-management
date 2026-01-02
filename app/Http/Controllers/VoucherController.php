@@ -131,11 +131,6 @@ class VoucherController extends Controller
         try {
             $voucher = Voucher::findOrFail($id);
             
-            $oldAmount = $voucher->amount;
-            $oldAccountId = $voucher->account_id;
-            $oldVoucherType = $voucher->voucher_type;
-            $oldModuleName = $voucher->module_name;
-            
             $voucher->date = $request->date ?? $voucher->date;
             $voucher->voucher_type = $request->voucher_type ?? $voucher->voucher_type;
             $voucher->account_id = $request->account_id ?? $voucher->account_id;
@@ -154,47 +149,45 @@ class VoucherController extends Controller
             $voucher->save();
 
             $transaction = AccountTransaction::where('reference_id', $voucher->id)
-                ->where('transaction_type', 'Voucher')
+                ->whereIn('transaction_type', ['Voucher', 'Order Commission', 'Servicing Charge'])
                 ->first();
 
-            if ($voucher->module_name === 'order_commission' && !$transaction) {
+            if ($transaction) {
+                $transactionType = 'Voucher';
+                if ($voucher->module_name === 'order_commission') {
+                    $transactionType = 'Order Commission';
+                } elseif ($voucher->module_name === 'servicing') {
+                    $transactionType = 'Servicing Charge';
+                }
+
+                $transaction->update([
+                    'transaction_type' => $transactionType,
+                    'voucher_type' => $voucher->voucher_type,
+                    'date' => $voucher->date,
+                    'account_id' => $voucher->account_id,
+                    'description' => $voucher->description ?? "Voucher Entry ($transactionType)",
+                    'amount' => $voucher->amount,
+                    'updated_by' => auth()->id(),
+                ]);
+            } else {
+                $transactionType = 'Voucher';
+                if ($voucher->module_name === 'SALARY_ADVANCE') {
+                    $transactionType = 'SALARY_ADVANCE';
+                } elseif ($voucher->module_name === 'SALARY') {
+                    $transactionType = 'SALARY_PAYMENT';
+                }
+
                 $transaction = new AccountTransaction;
-                $transaction->transaction_type = 'Voucher';
+                $transaction->transaction_type = $transactionType;
                 $transaction->voucher_type = $voucher->voucher_type;
                 $transaction->date = $voucher->date;
                 $transaction->account_id = $voucher->account_id;
                 $transaction->reference_id = $voucher->id;
-                $transaction->description = $voucher->description ?? 'Voucher Entry (Order Commission)';
+                $transaction->description = $voucher->description ?? "Voucher Entry ($transactionType)";
                 $transaction->amount = $voucher->amount;
                 $transaction->validity = 1;
                 $transaction->created_by = auth()->id();
                 $transaction->save();
-                
-                $this->adjustAccountBalanceForOrderCommission($voucher->account_id, $voucher->amount, $voucher->voucher_type);
-            }
-            else if ($transaction) {
-                $transaction->update([
-                    'voucher_type' => $request->voucher_type ?? $voucher->voucher_type,
-                    'date' => $request->date ?? $voucher->date,
-                    'account_id' => $request->account_id ?? $voucher->account_id,
-                    'description' => $request->description ?? $voucher->description ?? 'Voucher Entry',
-                    'amount' => $request->amount ?? $voucher->amount,
-                    'updated_by' => auth()->id(),
-                ]);
-                
-                if ($oldModuleName === 'order_commission' || $voucher->module_name === 'order_commission') {
-                    if ($oldAccountId != $voucher->account_id) {
-                        $this->adjustAccountBalanceForOrderCommission($oldAccountId, $oldAmount, $oldVoucherType, 'reverse');
-                        
-                        $this->adjustAccountBalanceForOrderCommission($voucher->account_id, $voucher->amount, $voucher->voucher_type);
-                    } 
-                    else if ($oldAmount != $voucher->amount || $oldVoucherType != $voucher->voucher_type) {
-
-                        $this->adjustAccountBalanceForOrderCommission($oldAccountId, $oldAmount, $oldVoucherType, 'reverse');
-                        
-                        $this->adjustAccountBalanceForOrderCommission($voucher->account_id, $voucher->amount, $voucher->voucher_type);
-                    }
-                }
             }
 
             CommonModel::updateAccountCurrentBalance();
@@ -223,38 +216,6 @@ class VoucherController extends Controller
             ], 500);
         }
     }
-
-    private function adjustAccountBalanceForOrderCommission($accountId, $amount, $voucherType, $action = 'add')
-    {
-        try {
-            $account = CashBank::find($accountId);
-            
-            if (!$account) {
-                return;
-            }
-            
-            if ($action === 'reverse') {
-                if ($voucherType === 'DEBIT') {
-                    $account->current_balance += $amount; 
-                } else {
-                    $account->current_balance -= $amount; 
-                }
-            } else {
-                if ($voucherType === 'DEBIT') {
-                    $account->current_balance -= $amount; 
-                } else {
-                    $account->current_balance += $amount; 
-                }
-            }
-            
-            $account->save();
-            
-        } catch (\Exception $e) {
-            \Log::error('Error adjusting account balance for order_commission: ' . $e->getMessage());
-            throw $e;
-        }
-    }
-
     public function destroy(string $id): JsonResponse
     {
         DB::beginTransaction();

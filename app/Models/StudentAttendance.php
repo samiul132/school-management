@@ -6,19 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Auth;
 
-class ClassWiseStudentData extends Model
+class StudentAttendance extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'school_id',
-        'class_id',
-        'version_id',
-        'session_id',
-        'section_id',
-        'class_roll',
-        'student_id',
-        'shift_id',
+        'date',
+        'class_wise_student_id',
+        'status',
+        'in_time',
+        'out_time',
     ];
 
     protected static function boot()
@@ -40,6 +38,11 @@ class ClassWiseStudentData extends Model
         });
     }
 
+    public function student()
+    {
+        return $this->belongsTo(ClassWiseStudentData::class, 'class_wise_student_id');
+    }
+
     public function studentProfile()
     {
         return $this->belongsTo(StudentProfile::class, 'student_id');
@@ -48,6 +51,11 @@ class ClassWiseStudentData extends Model
     public function class()
     {
         return $this->belongsTo(ClassManagement::class, 'class_id');
+    }
+
+    public function section()
+    {
+        return $this->belongsTo(SectionManagement::class, 'section_id');
     }
 
     public function version()
@@ -60,29 +68,9 @@ class ClassWiseStudentData extends Model
         return $this->belongsTo(SessionManagement::class, 'session_id');
     }
 
-    public function section()
-    {
-        return $this->belongsTo(SectionManagement::class, 'section_id');
-    }
-
     public function shift()
     {
         return $this->belongsTo(ShiftManagement::class, 'shift_id');
-    }
-
-    public function student()
-    {
-        return $this->belongsTo(StudentProfile::class, 'student_id');
-    }
-
-    public function studentWiseFeeAssigns()
-    {
-        return $this->hasMany(StudentWiseFeeAssign::class, 'class_wise_student_data_id');
-    }
-    
-    public function payments()
-    {
-        return $this->hasMany(Payment::class, 'class_wise_student_id');
     }
 
     public function attendances()

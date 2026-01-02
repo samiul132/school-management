@@ -28,7 +28,7 @@ class AccountHeadController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'head_name' => 'required|string|max:255|unique:account_heads',
+            'head_name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|in:active,inactive'
         ]);
@@ -91,7 +91,7 @@ class AccountHeadController extends Controller
         }
 
         $request->validate([
-            'head_name' => 'required|string|max:255|unique:account_heads,head_name,' . $id,
+            'head_name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|in:active,inactive'
         ]);

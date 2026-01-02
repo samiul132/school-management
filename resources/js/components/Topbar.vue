@@ -36,9 +36,6 @@
           <h2 class="text-lg font-bold text-gray-900 leading-tight truncate max-w-xs">
             {{ schoolName }}
           </h2>
-          <p v-if="schoolEmail || schoolAddress" class="text-xs text-gray-600 truncate max-w-xs">
-            {{ schoolEmail || schoolAddress }}
-          </p>
         </div>
         
         <!-- Mobile School Name Only -->

@@ -7,4 +7,5 @@ Route::get('/sanctum/csrf-cookie', function () {
 
 Route::get('/{any}', function () {
     return view('app');
-})->where('any', '.*');
+})->where('any', '^(?!api|sanctum).*$');
+//->where('any', '.*');

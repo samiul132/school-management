@@ -12,7 +12,7 @@
       <Sidebar 
         :sidebarOpen="sidebarOpen"
         :isMobile="isMobile"
-        @update:sidebarOpen="sidebarOpen = $event"
+        @update:sidebarOpen="sidebarOpen = $event" class="no-print"
       />
 
       <div :class="['transition-all duration-300', marginLeft, isMobile ? 'w-full' : '']">
@@ -21,7 +21,7 @@
           :sidebarOpen="sidebarOpen"
           :isMobile="isMobile"
           @update:sidebarOpen="sidebarOpen = $event"
-          class="sticky top-0 z-40"
+          class="sticky top-0 z-40 no-print"
         />
 
         <!-- Main Content Slot -->
@@ -31,10 +31,10 @@
           </div>
         </main>
 
-        <Footer />
+        <Footer class="no-print" />
       </div>
 
-      <DarkTheme :darkMode="darkMode" @update:darkMode="darkMode = $event" />
+      <DarkTheme :darkMode="darkMode" @update:darkMode="darkMode = $event" class="no-print" />
     </div>
   </div>
 </template>

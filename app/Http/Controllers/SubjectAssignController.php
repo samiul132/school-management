@@ -74,6 +74,7 @@ class SubjectAssignController extends Controller
             ], 422);
         }
 
+
         try {
             DB::beginTransaction();
 
@@ -100,6 +101,14 @@ class SubjectAssignController extends Controller
                 'section_id' => $request->section_id
             ])->get();
 
+            
+            if ($students->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No students found for this class/section'
+                ], 404);
+            }
+
             foreach ($students as $student) {
                 foreach ($request->subjects as $subjectId) {
                     $studentAssignDetails = new SubjectAssignStudent;
@@ -116,8 +125,6 @@ class SubjectAssignController extends Controller
                 'success' => true,
                 'message' => 'Subject assignment created successfully',
                 'data' => $subjectAssign,
-                'students_assigned' => $studentAssignDetails,
-                'subjects_assigned' => count($request->subjects)
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -181,6 +188,13 @@ class SubjectAssignController extends Controller
                 'class_id' => $request->class_id,
                 'section_id' => $request->section_id
             ])->get();
+
+            if ($students->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No students found for this class/section'
+                ], 404);
+            }
 
             SubjectAssignStudent::where('assign_id', $subjectAssign->id)->delete();
 

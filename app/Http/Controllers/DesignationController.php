@@ -28,7 +28,7 @@ class DesignationController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:designations,name'
+            'name' => 'required|string|max:255'
         ]);
 
         try {
@@ -67,7 +67,7 @@ class DesignationController extends Controller
     public function update(Request $request, Designation $designation): JsonResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:designations,name,' . $designation->id
+            'name' => 'required|string|max:255'
         ]);
 
         try {

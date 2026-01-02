@@ -30,7 +30,7 @@ class SubsidiaryController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:subsidiaries,name',
+            'name' => 'required|string|max:255',
             'status' => 'sometimes|in:active,inactive'
         ]);
 
@@ -71,7 +71,7 @@ class SubsidiaryController extends Controller
     public function update(Request $request, Subsidiary $subsidiary): JsonResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:subsidiaries,name,' . $subsidiary->id,
+            'name' => 'required|string|max:255',
             'status' => 'sometimes|in:active,inactive'
         ]);
 

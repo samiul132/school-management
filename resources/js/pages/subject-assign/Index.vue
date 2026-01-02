@@ -217,7 +217,7 @@
                   <tr 
                     v-for="detail in assignment.details" 
                     :key="detail.id"
-                    class="border-b border-gray-100 last:border-0 hover:bg-gray-50"
+                    class="border-b border-gray-100 last:border-0 odd:bg-white even:bg-gray-100 hover:bg-gray-50"
                   >
                     <td class="py-2 px-2 text-gray-700">
                       {{ detail.subject?.subject_name || 'N/A' }}

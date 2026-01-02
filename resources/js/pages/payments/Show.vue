@@ -7,12 +7,12 @@
           Payment Receipt
         </h1>
         <p class="text-xs text-gray-500 mt-0.5">View payment details and receipt</p>
-      </div>
+      </div>  
       
       <div class="flex items-center gap-2">
         <button 
           @click="printReceipt"
-          class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded-lg text-white text-sm font-medium transition-colors"
+          class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded-lg text-white text-sm font-medium transition-colors cursor-pointer"
         >
           <i class="fas fa-print text-xs"></i>
           Print Receipt
@@ -35,125 +35,77 @@
     </div>
 
     <!-- Receipt Container -->
-    <div v-if="!loading && payment" class="max-w-4xl mx-auto no-print-margin">
+    <div v-if="!loading && payment" class="mx-auto no-print-margin">
       <!-- Receipt Card -->
-      <div id="receipt-content" class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-        <!-- Receipt Header -->
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-3 print:p-2">
-          <div class="text-center">
-            <div class="mb-1.5 print:mb-1">
-              <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm print:w-8 print:h-8">
-                <i class="fas fa-receipt text-lg print:text-base"></i>
-              </div>
-            </div>
-            <h2 class="text-lg font-bold mb-0.5 print:text-base">Payment Receipt</h2>
-            <p class="text-blue-100 text-xs print:text-[10px]">Official Payment Confirmation</p>
-            <div class="mt-2 pt-2 border-t border-white/20 print:mt-1.5 print:pt-1.5">
-              <div class="text-[10px] text-blue-100">Receipt No.</div>
-              <div class="text-base font-bold print:text-sm">#{{ payment.id }}</div>
-            </div>
-          </div>
-        </div>
+      <div id="receipt-content" class="bg-white shadow-lg overflow-hidden">
+        <printHeader/>
 
         <!-- Receipt Body -->
-        <div class="p-3 print:p-2">
-          <!-- Payment Date -->
-          <div class="mb-3 text-center print:mb-1.5">
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 rounded-full print:px-2 print:py-0.5">
-              <i class="fas fa-calendar text-gray-600 text-[10px]"></i>
-              <span class="text-[11px] font-semibold text-gray-700 print:text-[10px]">
-                Payment Date: {{ formatDate(payment.payment_date) }}
-              </span>
-            </div>
-          </div>
-
+        <div>
           <!-- Student Information -->
-          <div class="mb-3 print:mb-2">
-            <div class="flex items-center gap-1.5 mb-1.5 print:mb-1">
-              <div class="p-1 bg-blue-100 rounded-lg">
-                <i class="fas fa-user-graduate text-blue-600 text-xs print:text-[10px]"></i>
-              </div>
-              <h3 class="text-sm font-bold text-gray-800 print:text-xs">Student Information</h3>
-            </div>
-            
-            <div class="bg-gray-50 rounded-lg p-2.5 border border-gray-200 print:p-1.5">
-              <div class="flex items-start gap-3 print:gap-2">
-                <!-- Student Image -->
-                <div class="shrink-0">
-                  <div class="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-md print:w-10 print:h-10">
-                    <img 
-                      v-if="payment.class_wise_student?.student?.student_image_url"
-                      :src="payment.class_wise_student.student.student_image_url" 
-                      :alt="payment.class_wise_student?.student?.student_name"
-                      class="w-full h-full object-cover"
-                    >
-                    <div v-else class="w-full h-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-                      <i class="fas fa-user text-blue-400 text-lg print:text-xs"></i>
-                    </div>
+          <div class="print:mb-1">
+            <div class="p-1 print:p-1">
+              
+              <div class="flex justify-between items-center">
+                <div class="flex-1 text-start">
+                  <span class="text-[12px] font-semibold text-black print:text-[10px]">
+                    Payment ID: #{{ payment.id }}
+                  </span>
+                </div>
+
+                <div class="bg-white flex justify-center items-center border-b-4 border-double border-black" style="width: fit-content; margin: 0 auto;">
+                  <div class="px-2">
+                    <p class="text-xs font-bold text-black text-center">
+                      Payment Receipt
+                    </p>
                   </div>
                 </div>
 
-                <!-- Student Details -->
-                <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2 print:gap-1.5">
-                  <div>
-                    <div class="text-[10px] text-gray-500 mb-0.5">Student Name</div>
-                    <div class="font-semibold text-gray-800 text-xs print:text-[11px]">
-                      {{ payment.class_wise_student?.student?.student_name || 'N/A' }}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div class="text-[10px] text-gray-500 mb-0.5">ID Card No.</div>
-                    <div class="font-semibold text-gray-800 text-xs print:text-[11px]">
-                      {{ payment.class_wise_student?.student?.id_card_number || 'N/A' }}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div class="text-[10px] text-gray-500 mb-0.5">Class Roll</div>
-                    <div>
-                      <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-800">
-                        {{ payment.class_wise_student?.class_roll || 'N/A' }}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div class="text-[10px] text-gray-500 mb-0.5">Mobile Number</div>
-                    <div class="font-semibold text-gray-800 text-xs print:text-[11px]">
-                      {{ payment.class_wise_student?.student?.mobile_number || 'N/A' }}
-                    </div>
-                  </div>
+                <div class="flex-1 text-right">
+                  <span class="text-[12px] font-semibold text-black print:text-[10px]">
+                    Date: {{ formatDate(payment.payment_date) }}
+                  </span>
                 </div>
               </div>
 
-              <!-- Academic Info -->
-              <div class="mt-2.5 pt-2.5 border-t border-gray-200 print:mt-1.5 print:pt-1.5">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 print:gap-1.5">
-                  <div class="text-center">
-                    <div class="text-[10px] text-gray-500 mb-0.5">Session</div>
-                    <div class="font-semibold text-gray-800 text-xs print:text-[11px]">
-                      {{ payment.class_wise_student?.session?.session_name || 'N/A' }}
-                    </div>
-                  </div>
-                  <div class="text-center">
-                    <div class="text-[10px] text-gray-500 mb-0.5">Class</div>
-                    <div class="font-semibold text-gray-800 text-xs print:text-[11px]">
-                      {{ payment.class_wise_student?.class?.class_name || 'N/A' }}
-                    </div>
-                  </div>
-                  <div class="text-center">
-                    <div class="text-[10px] text-gray-500 mb-0.5">Version</div>
-                    <div class="font-semibold text-gray-800 text-xs print:text-[11px]">
-                      {{ payment.class_wise_student?.version?.version_name || 'N/A' }}
-                    </div>
-                  </div>
-                  <div class="text-center">
-                    <div class="text-[10px] text-gray-500 mb-0.5">Section</div>
-                    <div class="font-semibold text-gray-800 text-xs print:text-[11px]">
-                      {{ payment.class_wise_student?.section?.section_name || 'N/A' }}
-                    </div>
-                  </div>
+              <!-- Payment Receipt -->
+              
+
+              <!-- Student Details - Name and ID -->
+              <div class="flex justify-between items-center gap-3 pb-2 border-b border-dashed border-gray-400 mt-2 print:border-gray-300">
+                <div class="flex-1">
+                  <span class="text-[12px] text-black font-semibold">
+                    Student Name: {{ payment.class_wise_student?.student?.student_name || 'N/A' }}
+                  </span>
+                </div>
+                <div class="text-right">
+                  <span class="text-[12px] text-black font-semibold">
+                    Student ID: {{ payment.class_wise_student?.student?.id_card_number || 'N/A' }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Academic Info - Version, Class, Section and Roll -->
+              <div class="grid grid-cols-4 gap-4 pb-2 border-b border-dashed border-gray-400 mt-2 print:border-gray-300">
+                <div>
+                  <span class="text-[12px] text-black font-medium">
+                    {{ payment.class_wise_student?.version?.version_name || 'N/A' }}
+                  </span>
+                </div>
+                <div>
+                  <span class="text-[12px] text-black font-medium">
+                    {{ payment.class_wise_student?.class?.class_name || 'N/A' }}
+                  </span>
+                </div>
+                <div>
+                  <span class="text-[12px] text-black font-medium">
+                    {{ payment.class_wise_student?.section?.section_name || 'N/A' }}
+                  </span>
+                </div>
+                <div class="text-right">
+                  <span class="text-[12px] text-black font-medium">
+                    Class Roll: {{ payment.class_wise_student?.class_roll || 'N/A' }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -161,135 +113,65 @@
 
           <!-- Payment Details -->
           <div class="mb-3 print:mb-2">
-            <div class="flex items-center gap-1.5 mb-1.5 print:mb-1">
-              <div class="p-1 bg-green-100 rounded-lg">
-                <i class="fas fa-money-bill-wave text-green-600 text-xs print:text-[10px]"></i>
-              </div>
-              <h3 class="text-sm font-bold text-gray-800 print:text-xs">Payment Details</h3>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2.5 print:gap-1.5 print:mb-1.5">
-              <!-- Month -->
-              <div class="bg-indigo-50 rounded-lg p-2 border border-indigo-200 print:p-1.5">
-                <div class="flex items-center gap-1.5">
-                  <i class="fas fa-calendar-day text-indigo-600 text-xs print:text-[10px]"></i>
-                  <div class="flex-1">
-                    <div class="text-[10px] text-indigo-600 mb-0.5">Payment For</div>
-                    <div class="font-semibold text-gray-800 text-xs print:text-[11px]">
-                      {{ payment.month?.month_name || 'N/A' }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Account -->
-              <div class="bg-blue-50 rounded-lg p-2 border border-blue-200 print:p-1.5">
-                <div class="flex items-center gap-1.5">
-                  <i :class="payment.account?.account_type === 'bank' ? 'fas fa-university' : 'fas fa-wallet'" class="text-blue-600 text-xs print:text-[10px]"></i>
-                  <div class="flex-1">
-                    <div class="text-[10px] text-blue-600 mb-0.5">Paid To</div>
-                    <div class="font-semibold text-gray-800 text-xs print:text-[11px]">
-                      {{ payment.account?.account_name || 'N/A' }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             <!-- Fee Details Table -->
-            <div class="overflow-hidden rounded-lg border border-gray-200">
+            <div class="overflow-hidden">
               <table class="w-full">
-                <thead class="bg-gray-100">
+                <thead class="bg-gray-500">
                   <tr>
-                    <th class="px-2 py-1.5 text-left text-[10px] font-semibold text-gray-600 uppercase print:px-1.5 print:py-1">SL</th>
-                    <th class="px-2 py-1.5 text-left text-[10px] font-semibold text-gray-600 uppercase print:px-1.5 print:py-1">Fee Head</th>
-                    <th class="px-2 py-1.5 text-right text-[10px] font-semibold text-gray-600 uppercase print:px-1.5 print:py-1">Amount Paid</th>
+                    <th class="px-2 py-2 text-left text-[10px] font-semibold text-white uppercase print:px-2 print:py-1 border-b border-gray-600 print:border-b-0" style="width: 40px;">SL</th>
+                    <th class="px-2 py-2 text-left text-[10px] font-semibold text-white uppercase print:px-2 print:py-1 border-b border-gray-600 print:border-b-0">Fee Head</th>
+                    <th class="px-2 py-2 text-right text-[10px] font-semibold text-white uppercase print:px-2 print:py-1 border-b border-gray-600 print:border-b-0">Amount Paid</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody>
                   <tr 
-                    v-for="(detail, index) in payment.payment_details" 
-                    :key="detail.id"
-                    class="hover:bg-gray-50"
-                  >
-                    <td class="px-2 py-1.5 print:px-1.5 print:py-1">
-                      <div class="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 print:w-4 print:h-4">
-                        <span class="text-[10px] font-semibold text-blue-700">{{ index + 1 }}</span>
+                      v-for="(detail, index) in groupedPaymentDetails" 
+                      :key="detail.head_id"
+                      :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-100'"
+                      class="border-b border-gray-300"
+                    >
+                    <td class="px-2 py-1.5 print:px-1.5 print:py-1" style="width: 40px;">
+                      <div class="flex items-center justify-left">
+                        <span class="text-[10px] font-semibold text-black">{{ index + 1 }}</span>
                       </div>
                     </td>
                     <td class="px-2 py-1.5 print:px-1.5 print:py-1">
-                      <div class="flex items-center gap-1.5">
-                        <div class="w-6 h-6 rounded-lg bg-green-100 flex items-center justify-center print:w-5 print:h-5">
-                          <i class="fas fa-file-invoice-dollar text-green-600 text-[10px]"></i>
-                        </div>
-                        <span class="font-medium text-gray-800 text-xs print:text-[11px]">
-                          {{ detail.fee_head?.head_name || 'N/A' }}
-                        </span>
-                      </div>
+                      <span class="font-medium text-black text-xs print:text-[11px]">
+                        {{ detail.fee_head?.head_name || 'N/A' }}
+                      </span>
                     </td>
                     <td class="px-2 py-1.5 text-right print:px-1.5 print:py-1">
-                      <span class="font-semibold text-gray-800 text-xs print:text-[11px]">
-                        ৳{{ formatAmount(detail.paid_amount) }}
+                      <span class="font-semibold text-black text-xs print:text-[11px]">
+                        {{ formatAmount(detail.paid_amount) }}/=	
                       </span>
                     </td>
                   </tr>
                 </tbody>
-                <tfoot class="bg-gradient-to-r from-green-50 to-emerald-50 border-t-2 border-green-200">
-                  <tr>
-                    <td colspan="2" class="px-2 py-2 text-left print:px-1.5 print:py-1.5">
-                      <span class="text-sm font-bold text-gray-800 print:text-xs">Total Amount Paid</span>
-                    </td>
-                    <td class="px-2 py-2 text-right print:px-1.5 print:py-1.5">
-                      <span class="text-base font-bold text-green-700 print:text-sm">
-                        ৳{{ formatAmount(payment.total_paid_amount) }}
-                      </span>
-                    </td>
-                  </tr>
-                </tfoot>
               </table>
             </div>
-          </div>
-
-          <!-- Amount in Words -->
-          <div class="mb-3 print:mb-2">
-            <div class="bg-yellow-50 rounded-lg p-2 border border-yellow-200 print:p-1.5">
-              <div class="flex items-start gap-1.5">
-                <i class="fas fa-info-circle text-yellow-600 mt-0.5 text-xs print:text-[10px]"></i>
-                <div>
-                  <div class="text-[10px] text-yellow-700 font-medium mb-0.5">Amount in Words</div>
-                  <div class="font-semibold text-gray-800 text-xs print:text-[11px]">
-                    {{ amountInWords }} Taka Only
-                  </div>
-                </div>
-              </div>
+            
+            <!-- Total Payment Amount -->
+            <div class="mt-0 px-2 py-2 print:px-1.5 print:py-1 flex justify-between items-center">
+              <span class="text-xs text-black print:text-xs">Amount in Words: {{ amountInWords }} Taka Only</span>
+              <span class="text-base font-bold text-black print:text-sm">
+                Total Payment Amount : {{ formatAmount(payment.total_paid_amount) }}/=	
+              </span>
             </div>
           </div>
 
           <!-- Footer Note -->
-          <div class="border-t border-gray-200 pt-2.5 mt-2.5 print:pt-2 print:mt-2">
-            <div class="flex items-center justify-between print:text-[10px]">
-              <div>
-                <div class="text-[10px] text-gray-500 mb-0.5">Generated On</div>
-                <div class="text-xs font-semibold text-gray-700 print:text-[10px]">{{ currentDateTime }}</div>
-              </div>
-              <div class="text-right">
-                <div class="text-[10px] text-gray-500 mb-1">Authorized Signature</div>
-                <div class="w-24 border-t-2 border-gray-300 pt-0.5 print:w-20">
-                  <div class="text-[10px] text-gray-500">Accounts</div>
+          <div class="pt-8 mt-8 print:pt-16 print:mt-16">
+            <div class="flex items-center justify-end print:text-[10px]">
+              <div class="text-center">
+                <div class="pt-0.5 print:w-auto" style="border-top: 1px solid black; min-width: 120px;">
+                  <div class="text-[10px] text-black mb-1">Authorized Signature</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Footer Message -->
-          <div class="mt-2.5 text-center print:mt-1.5">
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 rounded-full border border-blue-200 print:px-2 print:py-0.5">
-              <i class="fas fa-check-circle text-green-600 text-xs print:text-[10px]"></i>
-              <span class="text-[10px] font-medium text-gray-700">
-                Computer-generated receipt - No signature required
-              </span>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
@@ -301,6 +183,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import AppLayout from '../../Layouts/AppLayout.vue'
+import printHeader from '../../components/printHeader.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -353,8 +236,31 @@ const fetchPayment = async () => {
   }
 }
 
+const groupedPaymentDetails = computed(() => {
+  if (!payment.value?.payment_details) return []
+  
+  const grouped = {}
+  
+  payment.value.payment_details.forEach(detail => {
+    const headId = detail.fee_head?.id || detail.head_id
+    const headName = detail.fee_head?.head_name || 'N/A'
+    
+    if (!grouped[headId]) {
+      grouped[headId] = {
+        head_id: headId,
+        fee_head: { head_name: headName },
+        paid_amount: 0
+      }
+    }
+    
+    grouped[headId].paid_amount += parseFloat(detail.paid_amount || 0)
+  })
+  
+  return Object.values(grouped)
+})
+
 const formatAmount = (amount) => {
-  return parseFloat(amount || 0).toFixed(2)
+  return parseFloat(amount || 0).toFixed(0)
 }
 
 const formatDate = (date) => {
@@ -362,7 +268,7 @@ const formatDate = (date) => {
   const d = new Date(date)
   return d.toLocaleDateString('en-GB', { 
     day: '2-digit', 
-    month: 'long', 
+    month: 'short', 
     year: 'numeric' 
   })
 }
@@ -438,6 +344,15 @@ onMounted(() => {
 <style scoped>
 /* Hide elements on print */
 @media print {
+
+  #receipt-content .pt-8 {
+    padding-top: 20px !important;
+  }
+
+  #receipt-content .mt-8 {
+    margin-top: 20px !important;
+  }
+  
   /* Hide header, buttons, loading */
   .no-print {
     display: none !important;
@@ -475,27 +390,42 @@ onMounted(() => {
   /* A4 page settings */
   @page {
     margin: 0.5cm;
-    size: A4 portrait;
+    size: A4 portrait !important;
   }
   
-  /* Compact all spacing */
+  /* Increase spacing for print */
   #receipt-content * {
-    line-height: 1.3 !important;
+    line-height: 1.4 !important;
   }
   
   #receipt-content .p-3,
-  #receipt-content .p-2 {
+  #receipt-content .p-2,
+  #receipt-content .p-1 {
     padding: 8px !important;
   }
   
   #receipt-content .mb-3,
-  #receipt-content .mb-2 {
-    margin-bottom: 8px !important;
+  #receipt-content .mb-2,
+  #receipt-content .mb-1 {
+    margin-bottom: 10px !important;
+  }
+  
+  #receipt-content .mt-2 {
+    margin-top: 8px !important;
   }
   
   #receipt-content .gap-3,
   #receipt-content .gap-2 {
-    gap: 6px !important;
+    gap: 8px !important;
+  }
+  
+  #receipt-content .pb-2 {
+    padding-bottom: 8px !important;
+  }
+  
+  #receipt-content .pt-2,
+  #receipt-content .pt-2\.5 {
+    padding-top: 10px !important;
   }
   
   /* Compact header */
@@ -510,24 +440,17 @@ onMounted(() => {
   
   #receipt-content table td,
   #receipt-content table th {
-    padding: 4px 6px !important;
-  }
-  
-  #receipt-content tfoot td {
     padding: 6px !important;
   }
   
-  /* Prevent page breaks */
-  #receipt-content .bg-gray-50,
-  #receipt-content table,
-  #receipt-content .bg-yellow-50 {
-    page-break-inside: avoid;
+  #receipt-content .bg-gray-200 {
+    padding: 6px 8px !important;
   }
   
-  /* Remove border radius */
-  #receipt-content,
-  #receipt-content * {
-    border-radius: 0 !important;
+  /* Prevent page breaks */
+  #receipt-content .border,
+  #receipt-content table {
+    page-break-inside: avoid;
   }
   
   /* Compact images */
@@ -543,9 +466,9 @@ onMounted(() => {
     font-size: 11px !important;
   }
   
-  /* Hide borders on print for cleaner look */
+  /* Ensure black borders on print */
   #receipt-content .border {
-    border-color: #e5e7eb !important;
+    border-color: #000000 !important;
   }
   
   /* Hide breadcrumbs if any */

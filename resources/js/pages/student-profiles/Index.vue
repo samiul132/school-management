@@ -374,6 +374,16 @@
                         <i class="fas fa-eye text-green-600 text-xs w-4"></i>
                         <span>View Details</span>
                       </router-link>
+
+                      <!-- View Option -->
+                      <router-link 
+                        :to="{ name: 'student-profiles.idcardshow', params: { id: student.id } }"
+                        class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                        @click="closeDropdown"
+                      >
+                        <i class="fas fa-eye text-green-600 text-xs w-4"></i>
+                        <span>View Id card</span>
+                      </router-link>
                       
                       <!-- Edit Option -->
                       <router-link 

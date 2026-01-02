@@ -33,6 +33,7 @@ import StudentProfileIndex from '../pages/student-profiles/Index.vue'
 import StudentProfileCreate from '../pages/student-profiles/Create.vue'
 import StudentProfileEdit from '../pages/student-profiles/Edit.vue'
 import StudentProfileShow from '../pages/student-profiles/Show.vue'
+import StudentIdCardShow from '../pages/student-profiles/IdCardShow.vue'
 
 // CashBanks route
 import CashBankIndex from '../pages/cash-banks/Index.vue'
@@ -144,6 +145,16 @@ import StaffSalaryPaymentEdit from '../pages/staff-salary-payment/Edit.vue'
 
 // Post Notification routes
 import PostNotificationIndex from '../pages/post-notifications/Index.vue'
+
+// Class Routine routes
+import ClassRoutineIndex from '../pages/class-routines/Index.vue'
+import ClassRoutineCreate from '../pages/class-routines/Create.vue'
+import ClassRoutineEdit from '../pages/class-routines/Edit.vue'
+import ClassRoutineShow from '../pages/class-routines/Show.vue'
+
+// Student Attendance routes
+import StudentAttendanceIndex from '../pages/student-attendance/Index.vue'
+import StudentAttendanceCreate from '../pages/student-attendance/Create.vue'
 
 const routes = [
   { 
@@ -274,6 +285,13 @@ const routes = [
     path: '/student-profiles/:id',
     name: 'student-profiles.show',
     component: StudentProfileShow,
+    props: true,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/student-profiles/:id/id-card',
+    name: 'student-profiles.idcardshow',
+    component: StudentIdCardShow,
     props: true,
     meta: { requiresAuth: true }
   },
@@ -742,6 +760,48 @@ const routes = [
     meta: { requiresAuth: true }
   },
 
+  // Class Routine routes
+  {
+    path: '/class-routines',
+    name: 'class-routines.index',
+    component: ClassRoutineIndex,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/class-routines/create',
+    name: 'class-routines.create',
+    component: ClassRoutineCreate,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/class-routines/:id/edit',
+    name: 'class-routines.edit',
+    component: ClassRoutineEdit,
+    props: true,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/class-routines/:id',
+    name: 'class-routines.show',
+    component: ClassRoutineShow,
+    props: true,
+    meta: { requiresAuth: true }
+  },
+
+  // Student Attendance routes
+  {
+    path: '/student-attendance',
+    name: 'student-attendance.index',
+    component: StudentAttendanceIndex,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/student-attendance/create',
+    name: 'student-attendance.create',
+    component: StudentAttendanceCreate,
+    meta: { requiresAuth: true }
+  },
+  
 
 ]
 

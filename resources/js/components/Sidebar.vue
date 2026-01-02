@@ -112,32 +112,137 @@
           </router-link>
         </div>
 
-        <!-- My School Settings -->
-        <div class="relative overflow-visible">
-          <router-link 
-            to="/my-school-settings"
-            @click="handleLinkClick"
-            @mouseenter="(e) => updateTooltipPosition(e, 'School Settings')"
-            @mouseleave="hideTooltip"
-            :class="[
-              'flex items-center px-2 py-3 rounded-lg transition-all duration-300 group relative admission-item',
-              isActiveRoute('/my-school-settings')
-                ? 'bg-blue-50 text-blue-600 font-semibold'
-                : 'text-gray-900 hover:bg-gray-100'
-            ]"
-          >
-            <i class="fas fa-school mr-3"></i>
-            <span v-if="sidebarOpen">School Settings</span>
+        <!-- My School Settings Dropdown Menu -->
+        <div class="mb-1 relative dashboard-container overflow-visible">
+          <div class="relative overflow-visible admission-item">
+            <button
+              @click="myschoolSettingsOpen = !myschoolSettingsOpen"
+              @mouseenter="(e) => updateTooltipPosition(e, 'School Settings')"
+              @mouseleave="hideTooltip"
+              :class="[
+                'group w-full flex items-center justify-between p-2 rounded-xl transition-all duration-300',
+                myschoolSettingsOpen
+                  ? 'bg-blue-50 text-blue-600 font-semibold'
+                  : 'text-gray-900 hover:bg-gray-100'
+              ]"
+            >
+              <div class="flex items-center min-w-0">
+                <div
+                  :class="[
+                    'w-8 h-10 rounded-lg flex items-center justify-center transition-all duration-300 shrink-0',
+                    myschoolSettingsOpen
+                      ? 'bg-blue-50 text-blue-600 font-semibold'
+                    : 'text-gray-900 hover:bg-gray-100'
+                  ]"
+                >
+                <i class="fa-solid fa-school-flag"></i>
+                </div>
+                <span v-if="sidebarOpen" class="font-medium whitespace-nowrap">School Settings</span>
+              </div>
 
-            <!-- Tooltip for collapsed mode -->
+              <!-- Dropdown chevron: always visible, even when collapsed -->
+              <span class="transition-transform duration-300 shrink-0 ml-auto">
+                <svg v-if="myschoolSettingsOpen" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                </svg>
+                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </span>
+            </button>
+
+            <!-- Tooltip - FIXED POSITIONING -->
             <div v-if="!sidebarOpen && activeTooltip === 'School Settings'" 
                 class="tooltip-wrapper"
                 :style="tooltipStyle">
-              <div class="tooltip-content">
-                School Settings
-              </div>
+              <div class="tooltip-content">School Settings</div>
             </div>
-          </router-link>
+          </div>
+
+          <!-- Expanded Dropdown (Sidebar Open) -->
+          <transition name="dropdown">
+            <div v-if="myschoolSettingsOpen && sidebarOpen"
+              class="mt-1 ml-4 pl-3 border-l-2 border-gray-200 space-y-1 overflow-visible">
+              
+              <router-link
+                to="/my-school-settings"
+                @click="handleLinkClick"
+                :class="[
+                  'group flex items-center py-2 px-2 text-sm rounded-lg',
+                  isActiveRoute('/my-school-settings')
+                    ? 'bg-blue-50 text-blue-600 font-semibold'
+                    : 'text-gray-900 hover:bg-gray-100'
+                ]"
+              >
+                <i class="fas fa-school"></i>
+                <span class="ml-3">My Campus</span>
+              </router-link>
+
+              <router-link
+                to="/class-routines"
+                @click="handleLinkClick"
+                :class="[
+                  'group flex items-center py-2 px-2 text-sm rounded-lg',
+                  isActiveRoute('/class-routines')
+                    ? 'bg-blue-50 text-blue-600 font-semibold'
+                    : 'text-gray-900 hover:bg-gray-100'
+                ]"
+              >
+                <i class="fa-solid fa-calendar-week"></i>
+                <span class="ml-3">Class Routines</span>
+              </router-link>
+
+            </div>
+          </transition>
+
+          <!-- Compact Dropdown (Sidebar Collapsed) -->
+          <transition name="dropdown">
+            <div v-if="myschoolSettingsOpen && !sidebarOpen" class="mt-1 space-y-1 overflow-visible">
+
+              <!-- >My Campus -->
+              <router-link
+                to="/my-school-settings"
+                @click="handleLinkClick"
+                @mouseenter="(e) => updateTooltipPosition(e, 'My Campus')"
+                @mouseleave="hideTooltip"
+                :class="[
+                  'group relative flex items-center p-2 rounded-xl transition-all duration-300 dropdown-item',
+                  isActiveRoute('/my-school-settings')
+                    ? 'bg-blue-50 text-blue-600 font-semibold'
+                    : 'text-gray-900 hover:bg-gray-100'
+                ]"
+              >
+                <i class="fa-solid fa-calendar-week"></i>
+                <div v-if="!sidebarOpen && activeTooltip === 'My Campus'" 
+                     class="tooltip-wrapper"
+                     :style="tooltipStyle">
+                  <div class="tooltip-content">My Campus</div>
+                </div>
+              </router-link>
+
+              <!-- >My Campus -->
+              <router-link
+                to="/class-routines"
+                @click="handleLinkClick"
+                @mouseenter="(e) => updateTooltipPosition(e, 'Class Routiness')"
+                @mouseleave="hideTooltip"
+                :class="[
+                  'group relative flex items-center p-2 rounded-xl transition-all duration-300 dropdown-item',
+                  isActiveRoute('/class-routines')
+                    ? 'bg-blue-50 text-blue-600 font-semibold'
+                    : 'text-gray-900 hover:bg-gray-100'
+                ]"
+              >
+                <i class="fa-solid fa-calendar-week"></i>
+                <div v-if="!sidebarOpen && activeTooltip === 'Class Routiness'" 
+                     class="tooltip-wrapper"
+                     :style="tooltipStyle">
+                  <div class="tooltip-content">Class Routiness</div>
+                </div>
+              </router-link>
+              
+            </div>
+          </transition>
         </div>
 
         <!-- Students Dropdown Menu -->
@@ -202,8 +307,22 @@
                     : 'text-gray-900 hover:bg-gray-100'
                 ]"
               >
-                <i class="fas fa-user-friends mr-3"></i>
+                <i class="fas fa-user-friends"></i>
                 <span class="ml-3">Student List</span>
+              </router-link>
+
+              <router-link
+                to="/student-attendance"
+                @click="handleLinkClick"
+                :class="[
+                  'group flex items-center py-2 px-2 text-sm rounded-lg',
+                  isActiveRoute('/student-attendance')
+                    ? 'bg-blue-50 text-blue-600 font-semibold'
+                    : 'text-gray-900 hover:bg-gray-100'
+                ]"
+              >
+                <i class="fas fa-user-clock"></i>
+                <span class="ml-3">Student Attendance</span>
               </router-link>
 
             </div>
@@ -226,11 +345,32 @@
                     : 'text-gray-900 hover:bg-gray-100'
                 ]"
               >
-                <i class="fas fa-user-friends mr-3"></i>
+                <i class="fas fa-user-friends"></i>
                 <div v-if="!sidebarOpen && activeTooltip === 'Student List'" 
                      class="tooltip-wrapper"
                      :style="tooltipStyle">
                   <div class="tooltip-content">Student List</div>
+                </div>
+              </router-link>
+
+              <!-- Student Attendence -->
+              <router-link
+                to="/student-attendance"
+                @click="handleLinkClick"
+                @mouseenter="(e) => updateTooltipPosition(e, 'Student Attendance')"
+                @mouseleave="hideTooltip"
+                :class="[
+                  'group relative flex items-center p-2 rounded-xl transition-all duration-300 dropdown-item',
+                  isActiveRoute('/student-attendance')
+                    ? 'bg-blue-50 text-blue-600 font-semibold'
+                    : 'text-gray-900 hover:bg-gray-100'
+                ]"
+              >
+                <i class="fas fa-user-clock"></i>
+                <div v-if="!sidebarOpen && activeTooltip === 'Student Attendance'" 
+                     class="tooltip-wrapper"
+                     :style="tooltipStyle">
+                  <div class="tooltip-content">Student Attendance</div>
                 </div>
               </router-link>
               
@@ -1584,7 +1724,7 @@
           <div class="relative overflow-visible admission-item">
             <button
               @click="settingsOpen = !settingsOpen"
-              @mouseenter="(e) => updateTooltipPosition(e, 'Subject Settings')"
+              @mouseenter="(e) => updateTooltipPosition(e, 'Settings')"
               @mouseleave="hideTooltip"
               :class="[
                 'group w-full flex items-center justify-between p-2 rounded-xl transition-all duration-300',
@@ -1604,7 +1744,7 @@
                 >
                   <i class="fas fa-book"></i>
                 </div>
-                <span v-if="sidebarOpen" class="font-medium whitespace-nowrap">Subject Settings</span>
+                <span v-if="sidebarOpen" class="font-medium whitespace-nowrap">Settings</span>
               </div>
 
               <!-- Dropdown chevron: always visible, even when collapsed -->
@@ -1619,10 +1759,10 @@
             </button>
 
             <!-- Tooltip - FIXED POSITIONING -->
-            <div v-if="!sidebarOpen && activeTooltip === 'Subject Settings'" 
+            <div v-if="!sidebarOpen && activeTooltip === 'Settings'" 
                 class="tooltip-wrapper"
                 :style="tooltipStyle">
-              <div class="tooltip-content">Subject Settings</div>
+              <div class="tooltip-content">Settings</div>
             </div>
           </div>
 
@@ -1710,6 +1850,7 @@ export default {
       feesOpen: false,
       admissionConfigOpen: false,
       settingsOpen: false,
+      myschoolSettingsOpen: false,
       activeTooltip: null,
       tooltipStyle: {}
     }
@@ -1734,12 +1875,12 @@ export default {
           '/school-settings'
         ];
         this.schoolSettingsActive = schoolSettingsRoutes.includes(to.path);
-
+        
         const myschoolSettingsRoutes = [
-          '/my-school-settings'
+          '/my-school-settings',
+          '/class-routines',
         ];
-        this.myschoolSettingsActive = myschoolSettingsRoutes.includes(to.path);
-
+        this.myschoolSettingsOpen = myschoolSettingsRoutes.includes(to.path);
         const studentProfilesRoutes = [
           '/student-profiles'
         ];
@@ -1785,7 +1926,8 @@ export default {
         this.subjectOpen = subjectRoutes.includes(to.path);
 
         const studentRoutes = [
-          '/student-profiles'
+          '/student-profiles',
+          '/student-attendance',
         ];
         this.studentOpen = studentRoutes.includes(to.path);
 

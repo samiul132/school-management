@@ -32,11 +32,15 @@ use App\Http\Controllers\AdvancePaymentController;
 use App\Http\Controllers\OverTimeController;
 use App\Http\Controllers\StaffSalaryController;
 use App\Http\Controllers\StaffSalaryPaymentController;
-use App\Http\Controllers\PostNotificationController;
-use App\Http\Controllers\ExpoPushTokenController;
+use App\Http\Controllers\ClassRoutineController;
+use App\Http\Controllers\StudentAttendanceController;
+
+
 
 // Custom Auth Routes for React App
 use App\Http\Controllers\CustomAuthController;
+use App\Http\Controllers\PostNotificationController;
+use App\Http\Controllers\ExpoPushTokenController;
 
 Route::post('/custom-login', [CustomAuthController::class, 'login']);
 
@@ -84,6 +88,13 @@ Route::middleware('auth:sanctum')->group(function () {
 		Route::get('/districts', [AddressController::class, 'getDistricts']);
 		Route::get('/upazilas/{districtId}', [AddressController::class, 'getUpazilasByDistrict']);
 	});
+
+    // Post Notification Routes
+    Route::apiResource('post-notifications', PostNotificationController::class);
+    
+    // Expo Push Token Management
+    Route::post('/save-push-token', [ExpoPushTokenController::class, 'saveToken']);
+    Route::post('/remove-push-token', [ExpoPushTokenController::class, 'removeToken']);
 
 	// Cash/Bank Accounts Routes
 	Route::apiResource('cash-banks', CashBankController::class);
@@ -197,10 +208,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('staff-salary-payment', StaffSalaryPaymentController::class);
     Route::post('staff-salary-payment/prepare', [StaffSalaryPaymentController::class, 'prepare']);
 
-	// Post Notification Routes
-    Route::apiResource('post-notifications', PostNotificationController::class);
-    
-    // Expo Push Token Management
-    Route::post('/save-push-token', [ExpoPushTokenController::class, 'saveToken']);
-    Route::post('/remove-push-token', [ExpoPushTokenController::class, 'removeToken']);
+    // Staff Salary Payment Routes
+    Route::get('/class-routines/dropdown-data', [ClassRoutineController::class, 'getDropdownData']);
+    Route::apiResource('class-routines', ClassRoutineController::class);
+
+    // Student Attendance Routes 
+    Route::get('student-attendance/dropdown-data', [StudentAttendanceController::class, 'getDropdownData']);
+    Route::get('student-attendance/summary', [StudentAttendanceController::class, 'summary']);
+    Route::get('student-attendance/student-list', [StudentAttendanceController::class, 'getStudentList']);
+    Route::get('student-attendance/date/{date}', [StudentAttendanceController::class, 'getByDate']);
+    Route::apiResource('student-attendance', StudentAttendanceController::class);
+
 });

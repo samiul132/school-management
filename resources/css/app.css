@@ -65,15 +65,33 @@
     animation: none !important;
   }
 }
+
+/* ============================================= */
+/* DEFAULT: Portrait for ALL pages */
+/* ============================================= */
 @page {
   margin: 0.5cm;
-  size: A4 portrait;
+  size: A4 portrait !important;
+}
+
+/* ============================================= */
+/* EXCEPTION: Landscape ONLY for Class Routine */
+/* ============================================= */
+@page landscape-routine {
+  size: A4 landscape !important;
+  margin: 5mm !important;
 }
 
 @media print {
   /* Hide browser's default header/footer */
   body {
     margin: 0;
+  }
+  
+  /* Apply landscape ONLY to routine pages */
+  body.printing-routine,
+  body.printing-routine * {
+    page: landscape-routine !important;
   }
 }
 

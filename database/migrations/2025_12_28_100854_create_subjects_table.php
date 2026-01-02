@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('school_id');
             $table->string('subject_name');
             $table->integer('order_number')->default(0);
-            $table->integer('subject_code')->unique();
+            $table->integer('subject_code');
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
         });
