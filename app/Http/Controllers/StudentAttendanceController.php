@@ -30,6 +30,10 @@ class StudentAttendanceController extends Controller
                 });
             }
 
+            if ($request->has('class_wise_student_id') && $request->class_wise_student_id != '') {
+                $query->where('class_wise_student_id', $request->class_wise_student_id);
+            }
+
             if ($request->has('month') && $request->month != '') {
                 $query->whereMonth('date', $request->month);
             }
