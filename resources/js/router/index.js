@@ -145,6 +145,8 @@ import StaffSalaryPaymentEdit from '../pages/staff-salary-payment/Edit.vue'
 
 // Post Notification routes
 import PostNotificationIndex from '../pages/post-notifications/Index.vue'
+// App Slider routes
+import AppSliderIndex from '../pages/app-slider/Index.vue'
 
 // Class Routine routes
 import ClassRoutineIndex from '../pages/class-routines/Index.vue'
@@ -757,6 +759,14 @@ const routes = [
     path: '/post-notifications',
     name: 'post-notifications.index',
     component: PostNotificationIndex,
+    meta: { requiresAuth: true }
+  },
+
+  // App Slider routes
+  {
+    path: '/app-slider',
+    name: 'app-slider.index',
+    component: AppSliderIndex,
     meta: { requiresAuth: true }
   },
 

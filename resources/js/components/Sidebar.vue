@@ -1785,6 +1785,20 @@
                 <span class="ml-3">Post Notification</span>
               </router-link>
 
+              <router-link
+                to="/app-slider"
+                @click="handleLinkClick"
+                :class="[
+                  'group flex items-center py-2 px-2 text-sm rounded-lg',
+                  isActiveRoute('/app-slider')
+                    ? 'bg-blue-50 text-blue-600 font-semibold'
+                    : 'text-gray-900 hover:bg-gray-100'
+                ]"
+              >
+                <i class="fas fa-sliders"></i>
+                <span class="ml-3">App Slider</span>
+              </router-link>
+
             </div>
           </transition>
 
@@ -1810,6 +1824,26 @@
                      class="tooltip-wrapper"
                      :style="tooltipStyle">
                   <div class="tooltip-content">Post Notification</div>
+                </div>
+              </router-link>
+
+              <router-link
+                to="/app-slider"
+                @click="handleLinkClick"
+                @mouseenter="(e) => updateTooltipPosition(e, 'App Slider')"
+                @mouseleave="hideTooltip"
+                :class="[
+                  'group relative flex items-center p-2 rounded-xl transition-all duration-300 dropdown-item',
+                  isActiveRoute('/app-slider')
+                    ? 'bg-blue-50 text-blue-600 font-semibold'
+                    : 'text-gray-900 hover:bg-gray-100'
+                ]"
+              >
+                <i class="fas fa-sliders"></i>
+                <div v-if="!sidebarOpen && activeTooltip === 'App Slider'" 
+                     class="tooltip-wrapper"
+                     :style="tooltipStyle">
+                  <div class="tooltip-content">App Slider</div>
                 </div>
               </router-link>
               
@@ -1881,6 +1915,7 @@ export default {
           '/class-routines',
         ];
         this.myschoolSettingsOpen = myschoolSettingsRoutes.includes(to.path);
+
         const studentProfilesRoutes = [
           '/student-profiles'
         ];
@@ -1944,7 +1979,8 @@ export default {
         this.hrPayrollOpen = hrPayrollRoutes.includes(to.path);
 
         const settingsRoutes = [
-          '/designations',
+          '/post-notifications',
+          '/app-slider',
         ];
         this.settingsOpen = settingsRoutes.includes(to.path);
       }

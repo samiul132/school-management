@@ -40,6 +40,7 @@ use App\Http\Controllers\StudentAttendanceController;
 // Custom Auth Routes for React App
 use App\Http\Controllers\CustomAuthController;
 use App\Http\Controllers\PostNotificationController;
+use App\Http\Controllers\AppSliderController;
 use App\Http\Controllers\ExpoPushTokenController;
 
 Route::post('/custom-login', [CustomAuthController::class, 'login']);
@@ -91,6 +92,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Post Notification Routes
     Route::apiResource('post-notifications', PostNotificationController::class);
+    // App Slider Routes
+    Route::apiResource('app-sliders', AppSliderController::class);
     
     // Expo Push Token Management
     Route::post('/save-push-token', [ExpoPushTokenController::class, 'saveToken']);
