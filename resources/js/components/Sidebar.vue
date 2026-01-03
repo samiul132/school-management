@@ -401,7 +401,7 @@
                       : 'text-gray-900 hover:bg-gray-100'
                   ]"
                 >
-                  <i class="fas fa-cog"></i>
+                  <i class="fas fa-wrench"></i>
                 </div>
                 <span v-if="sidebarOpen" class="font-medium whitespace-nowrap">Configuration</span>
               </div>
@@ -1742,7 +1742,7 @@
                     : 'text-gray-900 hover:bg-gray-100'
                   ]"
                 >
-                  <i class="fas fa-book"></i>
+                  <i class="fas fa-gear"></i> 
                 </div>
                 <span v-if="sidebarOpen" class="font-medium whitespace-nowrap">Settings</span>
               </div>

@@ -92,6 +92,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Post Notification Routes
     Route::apiResource('post-notifications', PostNotificationController::class);
+    Route::post('/post-notifications/{id}/mark-read', [PostNotificationController::class, 'markAsRead']);
+    Route::post('/post-notifications/mark-all-read', [PostNotificationController::class, 'markAllAsRead']);
     // App Slider Routes
     Route::apiResource('app-sliders', AppSliderController::class);
     

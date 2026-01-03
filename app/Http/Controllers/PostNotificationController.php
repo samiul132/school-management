@@ -6,6 +6,7 @@ use App\Models\PostNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class PostNotificationController extends Controller
@@ -13,7 +14,19 @@ class PostNotificationController extends Controller
     public function index()
     {
         try {
-            $notifications = PostNotification::latest()->get();
+            $user = Auth::user();
+            
+            $notifications = PostNotification::latest()
+                ->get()
+                ->map(function ($notification) use ($user) {
+                    $isRead = DB::table('notification_reads')
+                        ->where('user_id', $user->id)
+                        ->where('notification_id', $notification->id)
+                        ->exists();
+                    
+                    $notification->is_read = $isRead;
+                    return $notification;
+                });
             
             return response()->json([
                 'success' => true,
@@ -47,6 +60,7 @@ class PostNotificationController extends Controller
             $postNotification = PostNotification::create([
                 'name' => $request->name,
                 'description' => $request->description,
+                'school_id' => Auth::user()->school_id,
             ]);
 
             $this->sendPushNotification(
@@ -72,6 +86,14 @@ class PostNotificationController extends Controller
     {
         try {
             $notification = PostNotification::findOrFail($id);
+            $user = Auth::user();
+            
+            $isRead = DB::table('notification_reads')
+                ->where('user_id', $user->id)
+                ->where('notification_id', $notification->id)
+                ->exists();
+            
+            $notification->is_read = $isRead;
             
             return response()->json([
                 'success' => true,
@@ -126,11 +148,18 @@ class PostNotificationController extends Controller
     {
         try {
             $notification = PostNotification::findOrFail($id);
+            $user = Auth::user();
+            
+            DB::table('notification_reads')
+                ->where('user_id', $user->id)
+                ->where('notification_id', $id)
+                ->delete();
+            
             $notification->delete();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Notification deleted successfully',
+                'message' => 'Notification removed successfully',
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -140,6 +169,70 @@ class PostNotificationController extends Controller
             ], 500);
         }
     }
+
+    public function markAsRead($id)
+    {
+        try {
+            $notification = PostNotification::findOrFail($id);
+            $user = Auth::user();
+            
+            DB::table('notification_reads')->updateOrInsert(
+                [
+                    'user_id' => $user->id,
+                    'notification_id' => $id,
+                ],
+                [
+                    'read_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification marked as read',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark notification as read',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function markAllAsRead()
+    {
+        try {
+            $user = Auth::user();
+            
+            $notificationIds = PostNotification::pluck('id');
+            
+            foreach ($notificationIds as $notificationId) {
+                DB::table('notification_reads')->updateOrInsert(
+                    [
+                        'user_id' => $user->id,
+                        'notification_id' => $notificationId,
+                    ],
+                    [
+                        'read_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'All notifications marked as read',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark all as read',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     private function sendPushNotification($title, $body)
     {
         try {

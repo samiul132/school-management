@@ -16,8 +16,8 @@
     </div>
 
     <!-- Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <div class="bg-white rounded-2xl shadow-lg p-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+      <div class="bg-white rounded-2xl shadow-lg p-2">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-gray-500 text-sm">Total Sliders</p>
@@ -29,7 +29,7 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-lg p-6">
+      <div class="bg-white rounded-2xl shadow-lg p-2">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-gray-500 text-sm">Latest Slider</p>
