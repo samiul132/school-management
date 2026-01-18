@@ -80,32 +80,26 @@ class SchoolSettingsController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $schoolId = auth()->user()->school_id;
+            $settings = SchoolSettings::all();
             
-            if (!$schoolId) {
+            if ($settings->isEmpty()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No school assigned to this user'
+                    'message' => 'No school settings found'
                 ], 404);
             }
 
-            $settings = SchoolSettings::find($schoolId);
-            
-            if (!$settings) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'School settings not found'
-                ], 404);
-            }
-
-            if ($settings->logo) {
-                $settings->logo_url = asset('assets/images/school_logo/' . $settings->logo);
-            }
+            $settings->each(function($setting) {
+                if ($setting->logo) {
+                    $setting->logo_url = asset('assets/images/school_logo/' . $setting->logo);
+                }
+            });
 
             return response()->json([
                 'success' => true,
                 'data' => $settings
             ]);
+            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -181,16 +175,7 @@ class SchoolSettingsController extends Controller
     public function show(string $id): JsonResponse
     {
         try {
-            $schoolId = auth()->user()->school_id;
-            
-            if ($id !== 'undefined' && $id != $schoolId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized access'
-                ], 403);
-            }
-
-            $settings = SchoolSettings::find($schoolId);
+            $settings = SchoolSettings::find($id);
 
             if (!$settings) {
                 return response()->json([
@@ -207,6 +192,7 @@ class SchoolSettingsController extends Controller
                 'success' => true,
                 'data' => $settings
             ]);
+            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -219,15 +205,6 @@ class SchoolSettingsController extends Controller
     public function update(Request $request, string $id): JsonResponse
     {
         try {
-            $schoolId = auth()->user()->school_id;
-            
-            if ($id != $schoolId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized access'
-                ], 403);
-            }
-
             $settings = SchoolSettings::find($id);
 
             if (!$settings) {
