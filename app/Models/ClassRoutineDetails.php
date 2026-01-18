@@ -34,7 +34,7 @@ class ClassRoutineDetails extends Model
         
         static::addGlobalScope('school', function ($builder) {
             if (Auth::check()) {
-                $builder->where('school_id', Auth::user()->school_id);
+                $builder->where('class_routine_details.school_id', Auth::user()->school_id);
             }
         });
     }

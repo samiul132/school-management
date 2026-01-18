@@ -75,4 +75,16 @@ class Payment extends Model
     {
         return $this->belongsTo(MonthManagement::class, 'month_id');
     }
+
+    public function student()
+    {
+        return $this->hasOneThrough(
+            StudentProfile::class,
+            ClassWiseStudentData::class,
+            'id', 
+            'id', 
+            'class_wise_student_id', 
+            'student_profile_id' 
+        );
+    }
 }

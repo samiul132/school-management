@@ -77,4 +77,9 @@ class StudentAttendance extends Model
     {
         return $this->hasMany(StudentAttendance::class, 'class_wise_student_id');
     }
+
+    public function classWiseStudent()
+    {
+        return $this->belongsTo(ClassWiseStudentData::class, 'class_wise_student_id');
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\UserRoleDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -81,5 +82,59 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         return response()->json($request->user());
+    }
+
+    public function getUserMenus(Request $request)
+    {
+        $user = Auth::user();
+        
+        $menuList = UserRoleDetails::select('menus.*')
+            ->where('role_id', $user->role_id)
+            ->leftJoin('menus', 'menus.id', '=', 'user_role_details.menu_id')
+            ->where('menus.show_on_navbar', 1)
+            ->orderBy('menus.sorting', 'asc')
+            ->get();
+
+        $allPermittedMenus = UserRoleDetails::select('menus.*')
+            ->where('role_id', $user->role_id)
+            ->leftJoin('menus', 'menus.id', '=', 'user_role_details.menu_id')
+            ->get();
+
+        $primaryMenu = [];
+        $subMenu = [];
+        
+        foreach ($menuList as $menu) {
+            if ($menu->is_primary_menu == 1) {
+                $primaryMenu[] = $menu;
+            } else if ($menu->parent_id != null) {
+                if (!isset($subMenu[$menu->parent_id])) {
+                    $subMenu[$menu->parent_id] = [];
+                }
+                $subMenu[$menu->parent_id][] = $menu;
+            }
+        }
+
+        $allRoutes = [];
+        
+        foreach ($allPermittedMenus as $menu) {
+            if (!empty($menu->backend_route) && $menu->backend_route !== '#') {
+                $allRoutes[] = $menu->backend_route;
+            }
+            
+            if (!empty($menu->frontend_route) && $menu->frontend_route !== '#') {
+                $allRoutes[] = $menu->frontend_route;
+            }
+        }
+        
+        $allRoutes = array_values(array_unique(array_filter($allRoutes)));
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'primaryMenu' => $primaryMenu,
+                'subMenu' => $subMenu,
+                'routes' => $allRoutes
+            ]
+        ]);
     }
 }

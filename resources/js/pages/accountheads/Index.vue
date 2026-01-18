@@ -78,7 +78,7 @@
         <table class="w-full min-w-[800px]">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">SL</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">Head Name</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">Description</th>
@@ -89,8 +89,9 @@
           </thead>
           <tbody class="divide-y divide-gray-200">
             <tr v-for="accountHead in paginatedAccountHeads" :key="accountHead.id" class="hover:bg-gray-50">
+              
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800 font-mono">
-                {{ accountHead.id }}
+                {{ getRowNumber(accountHead) }}
               </td>
               
               <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
@@ -357,9 +358,9 @@ const hasMorePages = computed(() => {
 const fetchAccountHeads = async () => {
   try {
     loading.value = true
-    console.log('Fetching account heads...')
+    //console.log('Fetching account heads...')
     const response = await axios.get('/api/accountheads')
-    console.log('Account heads data:', response.data)
+    //console.log('Account heads data:', response.data)
 
     accountHeads.value = response.data.data
   } catch (error) {
@@ -495,6 +496,11 @@ watch(
   },
   { immediate: true }
 )
+
+const getRowNumber = (accountHead) => {
+  const index = filteredAccountHeads.value.findIndex(s => s.id === accountHead.id)
+  return index + 1
+}
 
 onMounted(() => {
   fetchAccountHeads()

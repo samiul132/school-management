@@ -223,16 +223,20 @@ class VoucherController extends Controller
         try {
             $voucher = Voucher::findOrFail($id);
 
-            if ($voucher->module_name === 'order_commission') {
-                $this->adjustAccountBalanceForOrderCommission(
-                    $voucher->account_id, 
-                    $voucher->amount, 
-                    $voucher->voucher_type, 
-                    'reverse'
-                );
-            }
+            AccountTransaction::where('reference_id', $voucher->id)
+            ->whereIn('transaction_type', ['Voucher', 'Fee Payment', 'SALARY_ADVANCE', 'SALARY_PAYMENT'])
+            ->update(['validity' => 0]);
 
-            AccountTransaction::invalidateTransactions($voucher->id, 'Voucher');
+            // if ($voucher->module_name === 'order_commission') {
+            //     $this->adjustAccountBalanceForOrderCommission(
+            //         $voucher->account_id, 
+            //         $voucher->amount, 
+            //         $voucher->voucher_type, 
+            //         'reverse'
+            //     );
+            // }
+
+            // AccountTransaction::invalidateTransactions($voucher->id, 'Voucher');
 
             $voucher->delete();
 

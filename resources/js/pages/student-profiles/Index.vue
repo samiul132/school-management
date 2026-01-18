@@ -9,15 +9,31 @@
         </h1>
       </div>
 
-      <!-- Button -->
-      <router-link 
-        :to="{ name: 'student-profiles.create' }"
-        class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 
-          text-white px-3 py-2 rounded-lg font-semibold transition-colors w-full md:w-auto"
-      >
-        <i class="fas fa-plus"></i>
-        Add New Student
-      </router-link>
+      <!-- Buttons -->
+      <div class="flex flex-col md:flex-row gap-2">
+        <!-- Send SMS Credentials Button -->
+        <button 
+          v-if="selectedStudents.length > 0"
+          @click="handleSendSMSCredentials"
+          :disabled="sendingSMS"
+          class="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 
+            text-white px-3 py-2 rounded-lg font-semibold transition-colors w-full md:w-auto
+            disabled:opacity-50 cursor-pointer"
+        >
+          <i class="fas" :class="sendingSMS ? 'fa-spinner fa-spin' : 'fa-sms'"></i>
+          {{ sendingSMS ? 'Sending...' : `Send SMS Credentials (${selectedStudents.length})` }}
+        </button>
+
+        <!-- Add New Student Button -->
+        <router-link 
+          :to="{ name: 'student-profiles.create' }"
+          class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 
+            text-white px-3 py-2 rounded-lg font-semibold transition-colors w-full md:w-auto"
+        >
+          <i class="fas fa-plus"></i>
+          Add New Student
+        </router-link>
+      </div>
     </div>
 
     <!-- Advanced Filters Section -->
@@ -283,6 +299,29 @@
         <table class="w-full min-w-[1200px]">
           <thead class="bg-gray-50">
             <tr>
+              <!-- Select All Checkbox -->
+              <!-- <th class="px-4 py-3 text-left w-12">
+                <input 
+                  type="checkbox"
+                  v-model="selectAll"
+                  @change="toggleSelectAll"
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded 
+                    focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                >
+              </th> -->
+              <th class="px-4 py-3 text-left w-12">
+                <input 
+                  type="checkbox"
+                  v-model="selectAll"
+                  @change="toggleSelectAll"
+                  :disabled="paginatedStudents.every(student => student.school_id == 2)"
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded 
+                    focus:ring-blue-500 focus:ring-2"
+                  :class="paginatedStudents.every(student => student.school_id == 2)
+                    ? 'cursor-not-allowed opacity-50'
+                    : 'cursor-pointer'"
+                >
+              </th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">SL</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">Image</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">Student Info</th>
@@ -298,13 +337,40 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <tr v-for="(student, index) in paginatedStudents" :key="student.id" class="hover:bg-gray-50">
+            <tr v-for="(student, index) in paginatedStudents" :key="student.id" 
+              class="hover:bg-gray-50"
+              :class="{ 'bg-blue-50': isSelected(student.id) }">
+              <!-- Individual Checkbox -->
+              <!-- <td class="px-4 py-4 whitespace-nowrap">
+                <input 
+                  type="checkbox"
+                  :value="student.id"
+                  v-model="selectedStudents"
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded 
+                    focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                >
+              </td> -->
+              <td class="px-4 py-4 whitespace-nowrap">
+                <input 
+                  type="checkbox"
+                  :value="student.id"
+                  v-model="selectedStudents"
+                  :disabled="student.school_id == 2"
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded 
+                    focus:ring-blue-500 focus:ring-2"
+                  :class="student.school_id == 2
+                    ? 'cursor-not-allowed opacity-50' 
+                    : 'cursor-pointer'"
+                >
+              </td>
+              
               <!-- SL -->
               <td class="px-4 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">
                   {{ (currentPage - 1) * itemsPerPage + index + 1 }}
                 </div>
               </td>
+              
               <!-- Student Image -->
               <td class="px-4 py-4 whitespace-nowrap">
                 <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200">
@@ -615,18 +681,28 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
 import AppLayout from '../../Layouts/AppLayout.vue'
 import vSelect from 'vue-select'
 import 'vue-select/dist/vue-select.css'
-import { showSuccessAlert, showErrorAlert, showConfirmDialog, showLoadingAlert, closeAlert } from '../../utils/sweetAlert'
+import { showSuccessAlert, showErrorAlert, showConfirmDialog, showLoadingAlert, closeAlert, showSMSConfirmDialog } from '../../utils/sweetAlert'
 
 const router = useRouter()
 const route = useRoute()
 const students = ref([])
 const loading = ref(true)
+
+const selectedStudents = ref([])
+const selectAll = ref(false)
+const sendingSMS = ref(false)
+
+const isSelected = (studentId) => {
+  return selectedStudents.value.includes(studentId)
+}
+
+
 
 // Filter variables - temporary for UI
 const tempClassFilter = ref('')
@@ -822,9 +898,9 @@ const hasMorePages = computed(() => {
 const fetchStudents = async () => {
   try {
     loading.value = true
-    console.log('Fetching students...')
+    // console.log('Fetching students...')
     const response = await axios.get('/api/student-profiles')
-    console.log('Students API response:', response.data)
+    // console.log('Students API response:', response.data)
     
     if (response.data.success) {
       students.value = response.data.data.data || []
@@ -1123,6 +1199,83 @@ const handleClickOutside = (event) => {
     openDropdownId.value = null
   }
 }
+
+// const toggleSelectAll = () => {
+//   if (selectAll.value) {
+//     selectedStudents.value = paginatedStudents.value.map(student => student.id)
+//   } else {
+//     selectedStudents.value = []
+//   }
+// }
+
+const toggleSelectAll = () => {
+  if (selectAll.value) {
+    selectedStudents.value = paginatedStudents.value
+      .filter(student => student.school_id != 2)
+      .map(student => student.id)
+  } else {
+    selectedStudents.value = []
+  }
+}
+
+const handleSendSMSCredentials = async () => {
+  if (selectedStudents.value.length === 0) {
+    showErrorAlert('Error', 'Please select at least one student')
+    return
+  }
+
+  const result = await showSMSConfirmDialog(selectedStudents.value.length)
+
+  if (result.isConfirmed) {
+    try {
+      sendingSMS.value = true
+      showLoadingAlert('Sending SMS...')
+
+      const response = await axios.post('/api/student-profiles/send-sms-credentials', {
+        student_ids: selectedStudents.value
+      })
+
+      closeAlert()
+
+      if (response.data.success) {
+        showSuccessAlert(
+          'Success!', 
+          response.data.message || 'SMS sent successfully to selected students'
+        )
+        
+        selectedStudents.value = []
+        selectAll.value = false
+      } else {
+        showErrorAlert('Error', response.data.message || 'Failed to send SMS')
+      }
+
+    } catch (error) {
+      closeAlert()
+      console.error('Error sending SMS:', error)
+      showErrorAlert(
+        'Error', 
+        error.response?.data?.message || 'Failed to send SMS credentials'
+      )
+    } finally {
+      sendingSMS.value = false
+    }
+  }
+}
+
+watch(selectedStudents, (newValue) => { 
+  if (paginatedStudents.value.length > 0) {
+    const currentPageIds = paginatedStudents.value.map(s => s.id)
+    const allCurrentPageSelected = currentPageIds.every(id => newValue.includes(id))
+    selectAll.value = allCurrentPageSelected
+  } else {
+    selectAll.value = false
+  }
+})
+
+watch(currentPage, () => {
+  selectedStudents.value = []
+  selectAll.value = false
+})
 
 // Lifecycle hooks
 onMounted(() => {

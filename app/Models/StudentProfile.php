@@ -67,6 +67,11 @@ class StudentProfile extends Model
         });
     }
 
+    public function user()
+    {
+        return $this->hasOne(User::class, 'student_id');
+    }
+
     public function classWiseData()
     {
         return $this->hasMany(ClassWiseStudentData::class, 'student_id');

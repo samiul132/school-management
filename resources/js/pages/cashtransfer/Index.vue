@@ -130,7 +130,7 @@
         <table class="w-full min-w-[1200px]">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">SL</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Date</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">From Account</th>
@@ -144,7 +144,7 @@
             <tr v-for="transfer in paginatedTransfers" :key="transfer.id" class="hover:bg-gray-50">
               <!-- ID -->
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800 font-mono">
-                {{ transfer.id }}
+                {{ getRowNumber(transfer) }}
               </td>
               
               <!-- Actions -->
@@ -369,8 +369,8 @@ const totalAmount = computed(() =>
 
 const todayTransfers = computed(() => {
   const today = new Date().toISOString().split('T')[0] 
-  console.log('Today:', today)
-  console.log('All transfers dates:', transfers.value.map(t => t.date))
+  //console.log('Today:', today)
+  //console.log('All transfers dates:', transfers.value.map(t => t.date))
   
   const todayTransfers = transfers.value.filter(transfer => {
     let transferDate
@@ -381,11 +381,11 @@ const todayTransfers = computed(() => {
         transferDate = transfer.date
       }
     }
-    console.log(`Transfer ${transfer.id} date:`, transfer.date, '->', transferDate)
+    // console.log(`Transfer ${transfer.id} date:`, transfer.date, '->', transferDate)
     return transferDate === today
   })
   
-  console.log('Today transfers count:', todayTransfers.length)
+  //console.log('Today transfers count:', todayTransfers.length)
   return todayTransfers.length
 })
 
@@ -460,9 +460,9 @@ const hasMorePages = computed(() => {
 const fetchTransfers = async () => {
   try {
     loading.value = true
-    console.log('Fetching cash transfers...')
+    //console.log('Fetching cash transfers...')
     const response = await axios.get('/api/cash-transfers')
-    console.log('Transfers data:', response.data)
+    //console.log('Transfers data:', response.data)
     transfers.value = response.data
   } catch (error) {
     console.error('Error fetching transfers:', error)
@@ -543,13 +543,9 @@ const formatTime = (dateString) => {
 const formatCurrency = (amount) => {
   const numAmount = parseFloat(amount || 0)
   return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'BDT',
-    currencyDisplay: 'symbol',
-    minimumFractionDigits: 2
-  })
-    .format(numAmount)
-    .replace('BDT', '৳')
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  }).format(numAmount) + ' /='
 }
 
 // Pagination methods
@@ -584,6 +580,11 @@ watch([search, dateFrom, dateTo], () => {
 watch(itemsPerPage, () => {
   currentPage.value = 1
 })
+
+const getRowNumber = (transfer) => {
+  const index = filteredTransfers.value.findIndex(s => s.id === transfer.id)
+  return index + 1
+}
 
 // Lifecycle
 onMounted(() => {

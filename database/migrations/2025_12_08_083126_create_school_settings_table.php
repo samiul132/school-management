@@ -13,15 +13,13 @@ return new class extends Migration
     {
         Schema::create('school_settings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('school_id');
             $table->string('school_name');
             $table->string('address')->nullable();
             $table->string('mobile_number')->nullable();
             $table->string('email')->nullable();
             $table->string('logo')->nullable(); 
+            $table->string('sms_balance')->nullable(); 
             $table->timestamps();
-
-            $table->foreign('school_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

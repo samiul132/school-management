@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\SchoolSettings;
+use App\Models\SessionManagement;
+use App\Models\StudentProfile;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
@@ -21,17 +24,83 @@ class SchoolSettingsController extends Controller
         $this->imageManager = new ImageManager(new Driver());
     }
 
+    private function generateStudentId($schoolId)
+    {
+        $schoolCode = 'IQRA'; 
+        
+        $activeSession = SessionManagement::where('school_id', $schoolId)
+            ->where('status', 'active')
+            ->first();
+
+        if (!$activeSession) {
+            throw new \Exception('No active session found.');
+        }
+
+        $sessionYear = $activeSession->session_name;
+
+        $lastStudent = StudentProfile::where('school_id', $schoolId)
+            ->where('id_card_number', 'like', $schoolCode . $sessionYear . '%')
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if ($lastStudent && $lastStudent->id_card_number) {
+            $lastNumber = (int) substr($lastStudent->id_card_number, -6);
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+
+        return $schoolCode . $sessionYear . str_pad($newNumber, 6, '0', STR_PAD_LEFT);
+    }
+
+    public static function makeStudentId($schoolId)
+    {
+        $instance = new self();
+        return $instance->generateStudentId($schoolId);
+    }
+
+    public function getNextStudentId(): JsonResponse
+    {
+        try {
+            $schoolId = auth()->user()->school_id;
+            $nextId = $this->generateStudentId($schoolId);
+
+            return response()->json([
+                'success' => true,
+                'student_id' => $nextId
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
     public function index(): JsonResponse
     {
         try {
-            $settings = SchoolSettings::all();
+            $schoolId = auth()->user()->school_id;
             
-            $settings->transform(function ($setting) {
-                if ($setting->logo) {
-                    $setting->logo_url = asset('assets/images/school_logo/' . $setting->logo);
-                }
-                return $setting;
-            });
+            if (!$schoolId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No school assigned to this user'
+                ], 404);
+            }
+
+            $settings = SchoolSettings::find($schoolId);
+            
+            if (!$settings) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'School settings not found'
+                ], 404);
+            }
+
+            if ($settings->logo) {
+                $settings->logo_url = asset('assets/images/school_logo/' . $settings->logo);
+            }
 
             return response()->json([
                 'success' => true,
@@ -88,7 +157,6 @@ class SchoolSettingsController extends Controller
             $settings->mobile_number = $request->mobile_number;
             $settings->email = $request->email;
             $settings->logo = $logoName;
-            $settings->school_id = auth()->id();
             $settings->save();
 
             if ($settings->logo) {
@@ -112,11 +180,17 @@ class SchoolSettingsController extends Controller
 
     public function show(string $id): JsonResponse
     {
-        if($id=='undefined'){
-            $id = Auth::user()->id;
-        }
         try {
-            $settings = SchoolSettings::find($id);
+            $schoolId = auth()->user()->school_id;
+            
+            if ($id !== 'undefined' && $id != $schoolId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access'
+                ], 403);
+            }
+
+            $settings = SchoolSettings::find($schoolId);
 
             if (!$settings) {
                 return response()->json([
@@ -145,6 +219,15 @@ class SchoolSettingsController extends Controller
     public function update(Request $request, string $id): JsonResponse
     {
         try {
+            $schoolId = auth()->user()->school_id;
+            
+            if ($id != $schoolId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access'
+                ], 403);
+            }
+
             $settings = SchoolSettings::find($id);
 
             if (!$settings) {
@@ -238,6 +321,13 @@ class SchoolSettingsController extends Controller
     public function destroy(string $id): JsonResponse
     {
         try {
+            if (auth()->user()->type !== 'SUPER_ADMIN') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only super admin can delete school settings'
+                ], 403);
+            }
+
             $settings = SchoolSettings::find($id);
 
             if (!$settings) {

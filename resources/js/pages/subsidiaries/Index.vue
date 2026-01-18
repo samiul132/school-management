@@ -77,7 +77,7 @@
         <table class="w-full min-w-[800px]">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">SL</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">Subsidiary Name</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Status</th>
@@ -87,8 +87,9 @@
           </thead>
           <tbody class="divide-y divide-gray-200">
             <tr v-for="subsidiary in paginatedSubsidiaries" :key="subsidiary.id" class="hover:bg-gray-50">
+              
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800 font-mono">
-                {{ subsidiary.id }}
+                {{ getRowNumber(subsidiary) }}
               </td>
               
               <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
@@ -342,9 +343,9 @@ const hasMorePages = computed(() => {
 const fetchSubsidiaries = async () => {
   try {
     loading.value = true
-    console.log('Fetching subsidiaries...')
+    //console.log('Fetching subsidiaries...')
     const response = await axios.get('/api/subsidiaries')
-    console.log('Subsidiaries data:', response.data)
+    //console.log('Subsidiaries data:', response.data)
 
     subsidiaries.value = response.data.data
   } catch (error) {
@@ -461,6 +462,11 @@ const handleClickOutside = (event) => {
   if (!event.target.closest('.relative')) {
     openDropdownId.value = null
   }
+}
+
+const getRowNumber = (subsidiary) => {
+  const index = filteredSubsidiaries.value.findIndex(s => s.id === subsidiary.id)
+  return index + 1
 }
 
 watch([search, statusFilter], () => {

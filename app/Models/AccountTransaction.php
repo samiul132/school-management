@@ -83,6 +83,21 @@ class AccountTransaction extends Model
         return $this->belongsTo(CashBank::class, 'account_id');
     }
 
+    public function feePayment()
+    {
+        return $this->belongsTo(Payment::class, 'reference_id', 'id');
+    }
+
+    public function salaryPayment()
+    {
+        return $this->belongsTo(StaffSalaryPayment::class, 'reference_id', 'id');
+    }
+
+    public function salaryAdvance()
+    {
+        return $this->belongsTo(StaffSalaryPayment::class, 'reference_id', 'id');
+    }
+
     // public function createdBy()
     // {
     //     return $this->belongsTo(User::class, 'created_by');

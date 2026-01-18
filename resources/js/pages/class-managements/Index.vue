@@ -19,7 +19,7 @@
           <button
             @click="openCreateModal"
             class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 
-                    text-white px-4 py-2.5 rounded-lg font-semibold transition-colors"
+                    text-white px-4 py-2.5 rounded-lg font-semibold transition-colors cursor-pointer"
           >
             <i class="fas fa-plus"></i>
             New Class
@@ -101,7 +101,7 @@
         <table class="w-full min-w-[800px]">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">SL</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Actions</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">Class Name</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Status</th>
@@ -113,7 +113,7 @@
             <tr v-for="classItem in filteredClasses" :key="classItem.id" class="hover:bg-gray-50">
               <!-- ID -->
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800 font-mono">
-                {{ classItem.id }}
+                {{ getRowNumber(classItem) }}
               </td>
               
               <!-- Actions -->
@@ -657,6 +657,11 @@ const handleEscKey = (event) => {
   if (event.key === 'Escape' && showModal.value && !submitting.value) {
     closeModal()
   }
+}
+
+const getRowNumber = (classItem) => {
+  const index = filteredClasses.value.findIndex(s => s.id === classItem.id)
+  return index + 1
 }
 
 // Lifecycle

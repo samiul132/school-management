@@ -48,4 +48,16 @@ class StaffSalaryPayment extends Model
     {
         return $this->hasMany(StaffSalaryPaymentDetails::class, 'payment_id');
     }
+
+    public function staff()
+    {
+        return $this->hasOneThrough(
+            Staff::class,
+            StaffSalaryPaymentDetails::class,
+            'payment_id', 
+            'id', 
+            'id', 
+            'staff_id' 
+        )->distinct();
+    }
 }

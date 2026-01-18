@@ -141,7 +141,7 @@
         <table class="w-full min-w-[1200px]">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">SL</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Date</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">Account</th>
@@ -157,7 +157,7 @@
             <tr v-for="voucher in paginatedVouchers" :key="voucher.id" class="hover:bg-gray-50">
               <!-- ID -->
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800 font-mono">
-                {{ voucher.id }}
+                {{ getRowNumber(voucher) }}
               </td>
               
               <!-- Actions -->
@@ -525,23 +525,23 @@ const hasMorePages = computed(() => {
 const fetchVouchers = async () => {
   try {
     loading.value = true
-    console.log('Fetching all vouchers for cash in...')
+    // console.log('Fetching all vouchers for cash in...')
     const response = await axios.get('/api/vouchers')
-    console.log('Vouchers API response:', response.data)
+    // console.log('Vouchers API response:', response.data)
     
     // Filter only CREDIT vouchers for cash in
     const cashInVouchers = response.data.filter(voucher => voucher.voucher_type === 'CREDIT')
-    console.log('Cash In vouchers:', cashInVouchers)
+    // console.log('Cash In vouchers:', cashInVouchers)
     
     vouchers.value = cashInVouchers
     
     // Log first voucher to check relationships
-    if (cashInVouchers.length > 0) {
-      console.log('First cash in voucher data:', cashInVouchers[0])
-      console.log('Account data:', cashInVouchers[0].account)
-      console.log('Subsidiary data:', cashInVouchers[0].subsidiary)
-      console.log('Head data:', cashInVouchers[0].head)
-    }
+    // if (cashInVouchers.length > 0) {
+    //   console.log('First cash in voucher data:', cashInVouchers[0])
+    //   console.log('Account data:', cashInVouchers[0].account)
+    //   console.log('Subsidiary data:', cashInVouchers[0].subsidiary)
+    //   console.log('Head data:', cashInVouchers[0].head)
+    // }
     
   } catch (error) {
     console.error('Error fetching vouchers:', error)
@@ -663,11 +663,15 @@ const previousPage = () => {
   }
 }
 
-// Close dropdown when clicking outside
 const handleClickOutside = (event) => {
   if (!event.target.closest('.relative')) {
     openDropdownId.value = null
   }
+}
+
+const getRowNumber = (voucher) => {
+  const index = filteredVouchers.value.findIndex(s => s.id === voucher.id)
+  return index + 1
 }
 
 // Watchers

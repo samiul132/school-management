@@ -14,6 +14,9 @@ use App\Models\CommonModel;
 use App\Models\User;
 use App\Models\District;
 use App\Models\Upazila;
+use App\Models\MIMSmsModel;
+use App\Models\SmsHistory;
+use App\Models\SchoolSettings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -37,7 +40,6 @@ class StudentProfileController extends Controller
             $query = StudentProfile::hasActiveSessionData()
                 ->with(['classWiseData' => function($query) {
                     $activeSession = SessionManagement::where('status', 'active')
-                        //->where('school_id', auth()->user()->school_id)
                         ->first();
                     
                     if ($activeSession) {
@@ -57,9 +59,43 @@ class StudentProfileController extends Controller
                 });
             }
             
-            $perPage = $request->get('per_page', 15);
+            if ($request->has('class_id') && !empty($request->class_id)) {
+                $query->whereHas('classWiseData', function($q) use ($request) {
+                    $q->where('class_id', $request->class_id);
+                });
+            }
             
-            $students = $query->orderBy('created_at', 'desc')->paginate($perPage);
+            if ($request->has('session_id') && !empty($request->session_id)) {
+                $query->whereHas('classWiseData', function($q) use ($request) {
+                    $q->where('session_id', $request->session_id);
+                });
+            }
+            
+            if ($request->has('version_id') && !empty($request->version_id)) {
+                $query->whereHas('classWiseData', function($q) use ($request) {
+                    $q->where('version_id', $request->version_id);
+                });
+            }
+            
+            if ($request->has('section_id') && !empty($request->section_id)) {
+                $query->whereHas('classWiseData', function($q) use ($request) {
+                    $q->where('section_id', $request->section_id);
+                });
+            }
+            
+            if ($request->has('shift_id') && !empty($request->shift_id)) {
+                $query->whereHas('classWiseData', function($q) use ($request) {
+                    $q->where('shift_id', $request->shift_id);
+                });
+            }
+            
+            if ($request->has('class_roll') && !empty($request->class_roll)) {
+                $query->whereHas('classWiseData', function($q) use ($request) {
+                    $q->where('class_roll', $request->class_roll);
+                });
+            }
+            
+            $students = $query->orderBy('created_at', 'desc')->get();
             
             foreach ($students as $student) {
                 if ($student->student_image) {
@@ -74,7 +110,10 @@ class StudentProfileController extends Controller
             
             return response()->json([
                 'success' => true,
-                'data' => $students,
+                'data' => [
+                    'data' => $students,
+                    'total' => $students->count()
+                ],
                 'message' => 'Students with active session data retrieved successfully'
             ]);
             
@@ -89,66 +128,19 @@ class StudentProfileController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'student_name' => 'required|string|max:255', 
+            'id_card_number' => [
+                'nullable',
+                'string',
+                Rule::unique('student_profiles', 'id_card_number')
+                    ->where('school_id', auth()->user()->school_id)
+            ],
+        ]);
+
         DB::beginTransaction();
         
         try {
-            $validator = Validator::make($request->all(), [
-                'student_name' => 'required|string|max:255', 
-                'id_card_number' => [
-                    'nullable',
-                    'string',
-                    Rule::unique('student_profiles', 'id_card_number')
-                        ->where('school_id', auth()->user()->school_id)
-                ],
-                'student_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-                'date_of_birth' => 'nullable|date',
-                'gender' => 'nullable|string|in:male,female,other',
-                'religion' => 'nullable|string',
-                'birth_certificate_number' => 'nullable|string',
-                'nationality' => 'nullable|string',
-                'blood_group' => 'nullable|string',
-                'mobile_number' => 'nullable|string',
-                'email' => 'nullable|email|unique:users,email',
-                'father_name' => 'nullable|string|max:255',
-                'father_profession' => 'nullable|string',
-                'father_mobile_number' => 'nullable|string',
-                'mother_name' => 'nullable|string|max:255',
-                'mother_profession' => 'nullable|string',
-                'mother_mobile_number' => 'nullable|string',
-                'local_guardian_name' => 'nullable|string|max:255',
-                'local_guardian_profession' => 'nullable|string',
-                'local_guardian_mobile_number' => 'nullable|string',
-                'present_village' => 'nullable|string',
-                'present_post_office' => 'nullable|string',
-                'present_upazila_id' => 'nullable|string',
-                'present_district_id' => 'nullable|string',
-                'permanent_village' => 'nullable|string',
-                'permanent_post_office' => 'nullable|string',
-                'permanent_upazila_id' => 'nullable|string',
-                'permanent_district_id' => 'nullable|string',
-                'previous_institute_name' => 'nullable|string',
-                'previous_institute_class' => 'nullable|string',
-                'previous_institute_section' => 'nullable|string',
-                'previous_institute_roll' => 'nullable|string',
-                'previous_institute_result' => 'nullable|string',
-                'tc_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-
-                'academic_data.class_id' => 'nullable|exists:class_management,id',
-                'academic_data.version_id' => 'nullable|exists:version_management,id',
-                'academic_data.session_id' => 'nullable|exists:session_management,id',
-                'academic_data.section_id' => 'nullable|exists:section_management,id',
-                'academic_data.shift_id' => 'nullable|exists:shift_management,id',
-                'academic_data.class_roll' => 'nullable|integer|min:1',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
             $studentImageName = null;
             if ($request->hasFile('student_image')) {
                 $studentImage = $request->file('student_image');
@@ -223,7 +215,7 @@ class StudentProfileController extends Controller
             $student->tc_image = $tcImageName;
             $student->save();
         
-            $autoPassword = Str::random(8);
+            $autoPassword = rand(10000000, 99999999);
             
             $user = new User();
             $user->school_id = $schoolId;
@@ -231,7 +223,7 @@ class StudentProfileController extends Controller
             $user->name = $request->student_name;
             $user->user_name = $request->id_card_number ?? null;
             $user->email = $request->email ?? null;
-            $user->password = $autoPassword; 
+            $user->password = bcrypt($autoPassword);
             $user->type = 'student';
             $user->save();
 
@@ -282,6 +274,64 @@ class StudentProfileController extends Controller
             }
             
             DB::commit();
+            
+            $smsSent = false;
+            $smsMessage = '';
+
+            if ($request->mobile_number && $request->id_card_number) {
+                try {
+                    $username = $request->id_card_number;
+                    $message = "Dear Guardian,\n" .
+                        "App Login Credentials for {$student->student_name}.\n" .
+                        "Username: {$username}\n" .
+                        "Password: {$autoPassword}\n";
+                    
+                    $schoolSettings = SchoolSettings::find($schoolId);
+                    
+                    if ($schoolSettings && (float)$schoolSettings->sms_balance >= 0.40) {
+                        $smsResponse = MIMSmsModel::sendSms($request->mobile_number, $message);
+                        
+                        $smsHistory = new SmsHistory();
+                        $smsHistory->school_id = $schoolId;
+                        $smsHistory->send_to = $request->mobile_number;
+                        $smsHistory->message = $message;
+                        $smsHistory->response = null;
+                        $smsHistory->status = 'delivered';
+                        $smsHistory->tranx_id = null;
+                        $smsHistory->save();
+                        
+                        $newBalance = (float)$schoolSettings->sms_balance - 0.40;
+                        $schoolSettings->sms_balance = number_format($newBalance, 2, '.', '');
+                        $schoolSettings->save();
+                        
+                        $smsSent = true;
+                        $smsMessage = ' and SMS sent successfully';
+                    } else {
+                        $smsMessage = ' but SMS failed: Insufficient balance';
+                        
+                        $smsHistory = new SmsHistory();
+                        $smsHistory->school_id = $schoolId;
+                        $smsHistory->send_to = $request->mobile_number;
+                        $smsHistory->message = $message;
+                        $smsHistory->response = 'Insufficient SMS balance';
+                        $smsHistory->status = 'failed';
+                        $smsHistory->tranx_id = null;
+                        $smsHistory->save();
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('SMS sending failed during student creation: ' . $e->getMessage());
+                    $smsMessage = ' but SMS sending failed';
+                    
+                    $smsHistory = new SmsHistory();
+                    $smsHistory->school_id = $schoolId;
+                    $smsHistory->send_to = $request->mobile_number;
+                    $smsHistory->message = $message ?? 'SMS message not generated';
+                    $smsHistory->response = 'Error: ' . $e->getMessage();
+                    $smsHistory->status = 'failed';
+                    $smsHistory->tranx_id = null;
+                    $smsHistory->save();
+                }
+            }
             
             $student->load(['classWiseData' => function($query) {
                 $query->with(['class', 'version', 'session', 'section']);
@@ -359,77 +409,28 @@ class StudentProfileController extends Controller
 
     public function update(Request $request, string $id)
     {
+        $student = StudentProfile::find($id);
+    
+        if (!$student) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Student not found'
+            ], 404);
+        }
+        
+        $request->validate([
+            'student_name' => 'required|string|max:255',
+            'id_card_number' => [
+                'nullable',
+                'string',
+                Rule::unique('student_profiles', 'id_card_number')
+                    ->where('school_id', auth()->user()->school_id)
+                    ->ignore($id)
+            ],
+        ]);
         DB::beginTransaction();
         
         try {
-            $student = StudentProfile::find($id);
-            
-            if (!$student) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Student not found'
-                ], 404);
-            }
-            
-            $validator = Validator::make($request->all(), [
-                'student_name' => 'required|string|max:255',
-                'id_card_number' => [
-                    'nullable',
-                    'string',
-                    Rule::unique('student_profiles', 'id_card_number')
-                        ->where('school_id', auth()->user()->school_id)
-                        ->ignore($id)
-                ],
-                'student_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-                'date_of_birth' => 'nullable|date',
-                'gender' => 'nullable|string|in:male,female,other',
-                'religion' => 'nullable|string',
-                'birth_certificate_number' => 'nullable|string',
-                'nationality' => 'nullable|string',
-                'blood_group' => 'nullable|string',
-                'mobile_number' => 'nullable|string',
-                'email' => 'nullable|email|unique:users,email,' . $student->id . ',student_id',
-                'father_name' => 'nullable|string|max:255',
-                'father_profession' => 'nullable|string',
-                'father_mobile_number' => 'nullable|string',
-                'mother_name' => 'nullable|string|max:255',
-                'mother_profession' => 'nullable|string',
-                'mother_mobile_number' => 'nullable|string',
-                'local_guardian_name' => 'nullable|string|max:255',
-                'local_guardian_profession' => 'nullable|string',
-                'local_guardian_mobile_number' => 'nullable|string',
-                'present_village' => 'nullable|string',
-                'present_post_office' => 'nullable|string',
-                'present_upazila_id' => 'nullable|string',
-                'present_district_id' => 'nullable|string',
-                'permanent_village' => 'nullable|string',
-                'permanent_post_office' => 'nullable|string',
-                'permanent_upazila_id' => 'nullable|string',
-                'permanent_district_id' => 'nullable|string',
-                'previous_institute_name' => 'nullable|string',
-                'previous_institute_class' => 'nullable|string',
-                'previous_institute_section' => 'nullable|string',
-                'previous_institute_roll' => 'nullable|string',
-                'previous_institute_result' => 'nullable|string',
-                'tc_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-                'remove_student_image' => 'nullable|boolean',
-                'remove_tc_image' => 'nullable|boolean',
-
-                'academic_data.class_id' => 'nullable|exists:class_management,id',
-                'academic_data.version_id' => 'nullable|exists:version_management,id',
-                'academic_data.session_id' => 'nullable|exists:session_management,id',
-                'academic_data.section_id' => 'nullable|exists:section_management,id',
-                'academic_data.shift_id' => 'nullable|exists:shift_management,id',
-                'academic_data.class_roll' => 'nullable|integer|min:1',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
 
             if ($request->has('remove_student_image') && $request->remove_student_image) {
                 if ($student->student_image) {
@@ -746,4 +747,251 @@ class StudentProfileController extends Controller
             ], 500);
         }
     }
+
+    public function sendSmsCredentials(Request $request)
+    {
+        $request->validate([
+            'student_ids' => 'required|array|min:1',
+            'student_ids.*' => 'exists:student_profiles,id'
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $schoolId = auth()->user()->school_id;
+            
+            $schoolSettings = SchoolSettings::find($schoolId);
+
+            if (!$schoolSettings) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'School settings not found'
+                ], 404);
+            }
+
+            $currentBalance = (float) $schoolSettings->sms_balance;
+            
+            $students = StudentProfile::with('user')
+                ->whereIn('id', $request->student_ids)
+                ->get();
+
+            $requiredBalance = $students->count() * 0.40;
+
+            if ($currentBalance < $requiredBalance) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Insufficient SMS balance. Required: ' . $requiredBalance . ', Available: ' . $currentBalance
+                ], 400);
+            }
+
+            $results = [
+                'success' => 0, 
+                'failed' => 0, 
+                'errors' => [],
+                'details' => []
+            ];
+
+            foreach ($students as $student) {
+                $studentResult = [
+                    'student_name' => $student->student_name,
+                    'mobile' => $student->mobile_number,
+                    'status' => 'failed',
+                    'message' => ''
+                ];
+
+                if (!$student->user) {
+                    $results['failed']++;
+                    $studentResult['message'] = 'No user account found';
+                    $results['details'][] = $studentResult;
+                    $results['errors'][] = "{$student->student_name}: No user account";
+                    
+                    $smsHistory = new SmsHistory();
+                    $smsHistory->school_id = $schoolId;
+                    $smsHistory->send_to = $student->mobile_number ?? 'N/A';
+                    $smsHistory->message = 'Failed: No user account found';
+                    $smsHistory->response = 'No user account';
+                    $smsHistory->status = 'failed';
+                    $smsHistory->tranx_id = null;
+                    $smsHistory->save();
+                    
+                    continue;
+                }
+
+                if (!$student->mobile_number) {
+                    $results['failed']++;
+                    $studentResult['message'] = 'No mobile number';
+                    $results['details'][] = $studentResult;
+                    $results['errors'][] = "{$student->student_name}: No mobile number";
+                    
+                    $smsHistory = new SmsHistory();
+                    $smsHistory->school_id = $schoolId;
+                    $smsHistory->send_to = 'N/A';
+                    $smsHistory->message = 'Failed: No mobile number for ' . $student->student_name;
+                    $smsHistory->response = 'No mobile number';
+                    $smsHistory->status = 'failed';
+                    $smsHistory->tranx_id = null;
+                    $smsHistory->save();
+                    
+                    continue;
+                }
+
+                $newPassword = rand(10000000, 99999999);
+                $student->user->update(['password' => bcrypt($newPassword)]);
+
+                $username = $student->user->user_name;
+                $message = "Dear Guardian,\n" .
+                    "App Login Credentials for {$student->student_name}.\n" .
+                    "Username: {$username}\n" .
+                    "Password: {$newPassword}\n";
+                
+                try {
+                    $smsResponse = MIMSmsModel::sendSms($student->mobile_number, $message);
+                    
+                    $smsHistory = new SmsHistory();
+                    $smsHistory->school_id = $schoolId;
+                    $smsHistory->send_to = $student->mobile_number;
+                    $smsHistory->message = $message;
+                    $smsHistory->response = null;
+                    $smsHistory->status = 'delivered';
+                    $smsHistory->tranx_id = null;
+                    $smsHistory->save();
+
+                    $newBalance = $currentBalance - 0.40;
+                    $schoolSettings->sms_balance = number_format($newBalance, 2, '.', '');
+                    $schoolSettings->save();
+                    
+                    $currentBalance = $newBalance; 
+
+                    $results['success']++;
+                    $studentResult['status'] = 'success';
+                    $studentResult['message'] = 'SMS sent successfully';
+                    $studentResult['password'] = $newPassword;
+                    
+                } catch (\Exception $e) {
+                    \Log::error('SMS sending failed for student ' . $student->id . ': ' . $e->getMessage());
+                    
+                    $smsHistory = new SmsHistory();
+                    $smsHistory->school_id = $schoolId;
+                    $smsHistory->send_to = $student->mobile_number;
+                    $smsHistory->message = $message;
+                    $smsHistory->response = 'Error: ' . $e->getMessage();
+                    $smsHistory->status = 'failed';
+                    $smsHistory->tranx_id = null;
+                    $smsHistory->save();
+                    
+                    $results['failed']++;
+                    $studentResult['message'] = 'SMS sending failed: ' . $e->getMessage();
+                    $results['errors'][] = "{$student->student_name}: SMS failed";
+                }
+
+                $results['details'][] = $studentResult;
+            }
+
+            DB::commit();
+
+            $schoolSettings->refresh();
+
+            return response()->json([
+                'success' => $results['success'] > 0,
+                'message' => "SMS Sent: {$results['success']}, Failed: {$results['failed']}",
+                'data' => $results,
+                'sms_balance' => [
+                    'previous' => number_format($currentBalance + ($results['success'] * 0.40), 2),
+                    'current' => $schoolSettings->sms_balance,
+                    'used' => number_format($results['success'] * 0.40, 2)
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send credentials',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // public function sendSmsCredentials(Request $request)
+    // {
+    //     $request->validate([
+    //         'student_ids' => 'required|array|min:1',
+    //         'student_ids.*' => 'exists:student_profiles,id'
+    //     ]);
+
+    //     try {
+    //         $students = StudentProfile::with('user')
+    //             ->whereIn('id', $request->student_ids)
+    //             ->get();
+
+    //         $results = [
+    //             'success' => 0, 
+    //             'failed' => 0, 
+    //             'errors' => [],
+    //             'details' => []
+    //         ];
+
+    //         foreach ($students as $student) {
+    //             $studentResult = [
+    //                 'student_name' => $student->student_name,
+    //                 'mobile' => $student->mobile_number,
+    //                 'status' => 'failed',
+    //                 'message' => ''
+    //             ];
+
+    //             if (!$student->user) {
+    //                 $results['failed']++;
+    //                 $studentResult['message'] = 'No user account found';
+    //                 $results['details'][] = $studentResult;
+    //                 $results['errors'][] = "{$student->student_name}: No user account";
+    //                 continue;
+    //             }
+
+    //             if (!$student->mobile_number) {
+    //                 $results['failed']++;
+    //                 $studentResult['message'] = 'No mobile number';
+    //                 $results['details'][] = $studentResult;
+    //                 $results['errors'][] = "{$student->student_name}: No mobile number";
+    //                 continue;
+    //             }
+
+    //             $newPassword = rand(10000000, 99999999);
+    //             $student->user->update(['password' => bcrypt($newPassword)]);
+
+    //             $username = $student->user->user_name;
+    //             $message = "Dear Guardian,\n" .
+    //                 "App Login Credentials for {$student->student_name}.\n" .
+    //                 "Username: {$username}\n" .
+    //                 "Password: {$newPassword}\n";
+                
+    //             try {
+    //                 MIMSmsModel::sendSms($student->mobile_number, $message);
+    //                 $results['success']++;
+    //                 $studentResult['status'] = 'success';
+    //                 $studentResult['message'] = 'SMS sent successfully';
+    //                 $studentResult['password'] = $newPassword;
+    //             } catch (\Exception $e) {
+    //                 \Log::error('SMS sending failed for student ' . $student->id . ': ' . $e->getMessage());
+    //                 $results['failed']++;
+    //                 $studentResult['message'] = 'SMS sending failed';
+    //                 $results['errors'][] = "{$student->student_name}: SMS failed";
+    //             }
+
+    //             $results['details'][] = $studentResult;
+    //         }
+
+    //         return response()->json([
+    //             'success' => $results['success'] > 0,
+    //             'message' => "SMS Sent: {$results['success']}, Failed: {$results['failed']}",
+    //             'data' => $results
+    //         ]);
+
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to send credentials',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 }

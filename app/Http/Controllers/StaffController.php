@@ -55,7 +55,8 @@ class StaffController extends Controller
             'last_name'    => 'required',
             'designation'  => 'required',
             'basic_salary' => 'required',
-            'working_hour' => 'required'
+            'working_hour' => 'required',
+            'subsidiaries_id' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -139,6 +140,10 @@ class StaffController extends Controller
                 ], 404);
             }
 
+            $staff->image_url = $staff->photo
+            ? asset('assets/images/staffs/' . $staff->photo)
+            : asset('images/no-image.jpg');
+
             return response()->json([
                 'success' => true,
                 'data' => $staff
@@ -160,7 +165,8 @@ class StaffController extends Controller
             'last_name'    => 'required',
             'designation'  => 'required',
             'basic_salary' => 'required',
-            'working_hour' => 'required'
+            'working_hour' => 'required',
+            'subsidiaries_id' => 'required'
         ]);
 
         if ($validator->fails()) {

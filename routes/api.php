@@ -18,7 +18,7 @@ use App\Http\Controllers\ClassManagementController;
 use App\Http\Controllers\VersionManagementController;
 use App\Http\Controllers\SectionManagementController;
 use App\Http\Controllers\StudentProfileController;
-use App\Http\Controllers\FeeheadController;
+use App\Http\Controllers\FeeHeadController;
 use App\Http\Controllers\WaverController;
 use App\Http\Controllers\FeeAssignController;
 use App\Http\Controllers\PaymentController;
@@ -34,6 +34,11 @@ use App\Http\Controllers\StaffSalaryController;
 use App\Http\Controllers\StaffSalaryPaymentController;
 use App\Http\Controllers\ClassRoutineController;
 use App\Http\Controllers\StudentAttendanceController;
+use App\Http\Controllers\UserRoleController;
+use App\Http\Controllers\UserController;
+use App\Http\Middleware\AuthMenu;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CardTemplateController;
 
 
 
@@ -80,7 +85,7 @@ Route::middleware('auth:sanctum')->get('/current-school-settings', function () {
 });
 
 // Protected routes
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', AuthMenu::class])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 
@@ -128,7 +133,9 @@ Route::middleware('auth:sanctum')->group(function () {
 	Route::apiResource('vouchers', VoucherController::class);
 
     // School Settings Routes
+    Route::get('school-settings/next-student-id', [SchoolSettingsController::class, 'getNextStudentId']);
     Route::apiResource('school-settings', SchoolSettingsController::class);
+    
 	// Session Managements Routes
     Route::apiResource('session-managements', SessionManagementController::class);
 	// Month Managements Routes
@@ -144,6 +151,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 	// Student Profile Routes
 	Route::get('/student-profiles/dropdown/data', [StudentProfileController::class, 'getDropdownData'])->name('student-profiles.dropdown-data');
+    Route::post('/student-profiles/send-sms-credentials', [StudentProfileController::class, 'sendSmsCredentials']);
 	Route::apiResource('student-profiles', StudentProfileController::class);
 
 	// FeeHead Routes
@@ -223,5 +231,25 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('student-attendance/student-list', [StudentAttendanceController::class, 'getStudentList']);
     Route::get('student-attendance/date/{date}', [StudentAttendanceController::class, 'getByDate']);
     Route::apiResource('student-attendance', StudentAttendanceController::class);
+
+    // User Role Routes
+    Route::get('/user-roles/menus/all', [UserRoleController::class, 'getMenus']);
+    Route::apiResource('user-roles', UserRoleController::class);
+
+    // Users Routes
+    Route::put('/users/{id}/settings', [UserController::class, 'userUpdate']);
+    Route::get('/users/roles', [UserController::class, 'getRoles']);
+    Route::apiResource('users', UserController::class);
+
+    // User Menus Routes
+    Route::get('/user/menus', [AuthController::class, 'getUserMenus']);
+
+     // Dashboard Routes
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/custom-routines', [DashboardController::class, 'customRoutine'])->name('custom-routines');
+
+    // Card Template
+    Route::get('/card-templates/available-templates', [CardTemplateController::class, 'getAvailableTemplates']);
+    Route::apiResource('card-templates', CardTemplateController::class);
 
 });

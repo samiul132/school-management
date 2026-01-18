@@ -54,7 +54,7 @@
         <table class="w-full">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">SL</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Staff Name</th>
@@ -70,7 +70,7 @@
             <tr v-for="payment in paginatedPayments" :key="payment.id" class="hover:bg-gray-50">
               <!-- ID -->
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800 font-mono">
-                {{ payment.id }}
+                {{ getRowNumber(payment) }}
               </td>
               
               <!-- Actions -->
@@ -439,6 +439,11 @@ const handleClickOutside = (event) => {
   if (!event.target.closest('.relative')) {
     openDropdownId.value = null
   }
+}
+
+const getRowNumber = (payment) => {
+  const index = filteredPayments.value.findIndex(s => s.id === payment.id)
+  return index + 1
 }
 
 watch([search], () => {

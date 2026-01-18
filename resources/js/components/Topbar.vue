@@ -47,22 +47,14 @@
       </div>
 
       <!-- Search -->
-      <div class="flex items-center justify-center md:justify-end flex-1 relative transition-all duration-500 w-full md:w-auto">
-        <input
-          type="text"
-          placeholder="Search..."
-          @focus="searchActive = true"
-          @blur="searchActive = false"
-          class="w-full md:w-48 lg:w-56 focus:w-full md:focus:w-72 pl-4 pr-10 py-2 text-sm rounded-full bg-gray-100 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-300"
-        />
-        <svg 
-          :class="['absolute right-3 top-2.5 w-[18px] h-[18px] transition-all duration-300 shrink-0', searchActive ? 'scale-110 text-blue-500' : 'text-gray-500']"
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
+      <div class="flex items-center justify-center md:justify-end flex-1 relative w-full md:w-auto">
+        <div
+          class="w-full md:w-36 lg:w-48 pl-4 pr-4 py-2 text-sm rounded-full 
+                bg-gray-100 border border-gray-300 dark:border-gray-600
+                text-gray-700 font-semibold text-center"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
+          SMS Balance : <span class="text-gray-600">{{schoolSmsBalanace}} BDT</span>
+        </div>
       </div>
 
       <!-- Right Section -->
@@ -124,13 +116,31 @@
             :class="['flex items-center transition-all duration-300 rounded-full shrink-0', profileOpen ? 'ring-2 ring-blue-400' : '']"
             title="Profile"
           >
-            <!-- User Avatar or Icon -->
-            <div v-if="user" class="w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300 cursor-pointer">
+            <!-- School Logo (Highest Priority) -->
+            <img
+              v-if="schoolLogo"
+              :src="schoolLogo"
+              @error="handleImageError"
+              class="w-10 h-10 rounded-full object-cover border border-gray-300 shadow-sm hover:scale-105 transition-all duration-300 cursor-pointer"
+              alt="School Logo"
+            />
+
+            <!-- Fallback: User Initials -->
+            <div
+              v-else-if="user"
+              class="w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-sm hover:scale-105 transition-all duration-300 cursor-pointer"
+            >
               {{ getUserInitials(user.name) }}
             </div>
-            <div v-else class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300 cursor-pointer">
-              <svg class="w-6 h-6 text-gray-600 dark:text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+
+            <!-- Fallback: Default Icon -->
+            <div
+              v-else
+              class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center shadow-sm"
+            >
+              <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
           </button>
@@ -150,25 +160,16 @@
                 <div class="font-medium dark:text-gray-900">Guest User</div>
               </div>
               
-              <a href="#" class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all dark:text-gray-900">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                Profile
-              </a>
-              <a href="#" class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all dark:text-gray-900">
+              <router-link 
+                :to="{ name: 'user.settings' }"
+                class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all dark:text-gray-900"
+              >
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 Settings
-              </a>
-              <a href="#" class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all dark:text-gray-900">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Help
-              </a>
+              </router-link>
               <hr class="border-gray-200 dark:border-gray-700 my-1" />
               <a 
                 @click.prevent="handleLogout" 
@@ -226,6 +227,7 @@ export default {
     const schoolLogo = computed(() => schoolStore.getSchoolLogo());
     const schoolEmail = computed(() => schoolStore.getSchoolEmail());
     const schoolAddress = computed(() => schoolStore.getSchoolAddress());
+    const schoolSmsBalanace = computed(() => schoolStore.getSchoolSmsBanalce());
     const schoolLoading = computed(() => schoolStore.loading);
 
     const notifications = [
@@ -308,7 +310,6 @@ export default {
     onMounted(async () => {
       document.addEventListener('click', handleClickOutside);
       
-      // Fetch Use Data
       if (authStore.state.isAuthenticated && !authStore.state.user) {
         try {
           await authStore.fetchUser();
@@ -317,7 +318,6 @@ export default {
         }
       }
 
-      // Fetch school settings if not already loaded
       if (!schoolStore.settings) {
         try {
           await schoolStore.fetchSchoolSettings();
@@ -326,7 +326,41 @@ export default {
         }
       }
 
+      const smsBalanceInterval = setInterval(async () => {
+        if (authStore.state.isAuthenticated) {
+          try {
+            await schoolStore.fetchSchoolSettings();
+          } catch (error) {
+            console.error('Failed to refresh SMS balance:', error);
+          }
+        }
+      }, 30000); 
+
+      onUnmounted(() => {
+        clearInterval(smsBalanceInterval);
+      });
     });
+
+    // onMounted(async () => {
+    //   document.addEventListener('click', handleClickOutside);
+      
+    //   if (authStore.state.isAuthenticated && !authStore.state.user) {
+    //     try {
+    //       await authStore.fetchUser();
+    //     } catch (error) {
+    //       console.error('Failed to fetch user:', error);
+    //     }
+    //   }
+
+    //   if (!schoolStore.settings) {
+    //     try {
+    //       await schoolStore.fetchSchoolSettings();
+    //     } catch (error) {
+    //       console.error('Failed to fetch school settings:', error);
+    //     }
+    //   }
+
+    // });
 
     onUnmounted(() => {
       document.removeEventListener('click', handleClickOutside);
@@ -346,6 +380,7 @@ export default {
       schoolLogo,
       schoolEmail,
       schoolAddress,
+      schoolSmsBalanace,
       schoolLoading,
       toggleSidebar,
       toggleNotifications,

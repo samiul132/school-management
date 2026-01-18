@@ -427,7 +427,8 @@ const fetchSchoolData = async () => {
     initialLoading.value = true
     const schoolId = route.params.id
     
-    const response = await axios.get(`/api/school-settings/${schoolId}`)
+    //const response = await axios.get(`/api/school-settings/${schoolId}`)
+    const response = await axios.get('/api/current-school-settings')
     
     if (response.data && response.data.success && response.data.data) {
       const school = response.data.data

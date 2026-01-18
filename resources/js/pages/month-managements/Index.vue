@@ -19,7 +19,7 @@
           <button
             @click="openCreateModal"
             class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 
-                    text-white px-4 py-2.5 rounded-lg font-semibold transition-colors"
+                    text-white px-4 py-2.5 rounded-lg font-semibold transition-colors cursor-pointer"
           >
             <i class="fas fa-plus"></i>
             New Month

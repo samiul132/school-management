@@ -63,6 +63,9 @@ export const useSchoolStore = defineStore('school', () => {
   function getSchoolAddress() {
     return settings.value?.address || '';
   }
+  function getSchoolSmsBanalce() {
+    return settings.value?.sms_balance || '';
+  }
 
   function getSchoolMobile() {
     return settings.value?.mobile_number || '';
@@ -93,6 +96,7 @@ export const useSchoolStore = defineStore('school', () => {
     getSchoolLogo,
     getSchoolEmail,
     getSchoolAddress,
+    getSchoolSmsBanalce,
     getSchoolMobile,
     clearSettings
   };

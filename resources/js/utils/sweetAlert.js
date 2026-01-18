@@ -52,6 +52,21 @@ export const showLoadingAlert = (title = 'Loading...') => {
     })
 }
 
+// SMS Send Confirmation Dialog
+export const showSMSConfirmDialog = (count) => {
+    return Swal.fire({
+        title: 'Send SMS Credentials?',
+        text: `Are you sure you want to send credentials to ${count} selected student(s)?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981', 
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Send SMS!',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
+    })
+}
+
 // Close any open alert
 export const closeAlert = () => {
     Swal.close()

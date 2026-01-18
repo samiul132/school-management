@@ -19,7 +19,7 @@
           <button
             @click="openCreateModal"
             class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 
-                    text-white px-4 py-2.5 rounded-lg font-semibold transition-colors"
+                    text-white px-4 py-2.5 rounded-lg font-semibold transition-colors cursor-pointer"
           >
             <i class="fas fa-plus"></i>
             New Section
@@ -101,9 +101,10 @@
         <table class="w-full min-w-[800px]">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">SL</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Actions</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">Section Name</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">Class</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Status</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">Created At</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">Updated At</th>
@@ -113,7 +114,7 @@
             <tr v-for="section in filteredSections" :key="section.id" class="hover:bg-gray-50">
               <!-- ID -->
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800 font-mono">
-                {{ section.id }}
+                {{ getRowNumber(section) }}
               </td>
               
               <!-- Actions -->
@@ -174,6 +175,16 @@
                   <i class="fas fa-users text-gray-400"></i>
                   <div class="truncate max-w-[200px]" :title="section.section_name">
                     {{ section.section_name }}
+                  </div>
+                </div>
+              </td>
+
+              <!-- Class -->
+              <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-users text-gray-400"></i>
+                  <div class="truncate max-w-[200px]" :title="section.section_name">
+                    {{ section.class_name }}
                   </div>
                 </div>
               </td>
@@ -281,7 +292,7 @@
             <!-- Class Selection -->
             <div class="space-y-2">
               <label class="block text-sm font-medium text-gray-700">
-                Class
+                Class <span class="text-red-500">*</span>
               </label>
               <v-select
                 v-model="form.class_id"
@@ -290,7 +301,7 @@
                 :searchable="true"
                 label="class_name"
                 :reduce="classItem => classItem.id"
-                placeholder="Select class (optional)"
+                placeholder="Select class"
               >
                 <template #option="option">
                   <div>
@@ -305,7 +316,7 @@
             <!-- Section Name -->
             <div class="mb-6">
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Section Name *
+                Section Name <span class="text-red-500">*</span>
               </label>
               <input 
                 type="text" 
@@ -639,7 +650,6 @@ const formatDate = (dateString) => {
 const formatTime = (timeString) => {
   if (!timeString) return 'N/A'
   
-  // Handle both time-only strings and datetime strings
   const date = new Date(timeString)
   if (isNaN(date.getTime())) return 'N/A'
   
@@ -703,6 +713,11 @@ const handleEscKey = (event) => {
   }
 }
 
+const getRowNumber = (section) => {
+  const index = filteredSections.value.findIndex(s => s.id === section.id)
+  return index + 1
+}
+
 // Lifecycle
 onMounted(async () => {
   await fetchSections()
@@ -714,7 +729,6 @@ onMounted(async () => {
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
   document.removeEventListener('keydown', handleEscKey)
-  // Make sure to reset body overflow when component unmounts
   document.body.style.overflow = 'auto'
 })
 </script>

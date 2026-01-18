@@ -3,16 +3,16 @@
     <div class="flex flex-col lg:flex-row w-full max-w-6xl shadow-lg rounded-xl overflow-hidden bg-white">
       
       <!-- Image Section (Hidden on mobile) -->
-      <div class="lg:w-5/12 hidden lg:flex items-stretch">
+      <div class="lg:w-6/12 hidden lg:flex items-stretch">
         <img 
           src="/public/assets/defultimage.jpg" 
           alt="Login Image" 
-          class="object-cover w-full h-full"
+          class="object-cover w-full h-[500px]"
         />
       </div>
 
       <!-- Form Section -->
-      <div class="lg:w-7/12 w-full flex flex-col justify-center items-center p-6 md:p-8 text-gray-900">
+      <div class="lg:w-6/12 w-full flex flex-col justify-center items-center p-6 md:p-8 text-gray-900">
         
         <!-- Logo Section -->
         <div class="items-stretch">
@@ -53,30 +53,45 @@
           <!-- Password Field -->
           <div>
             <label class="block mb-1 text-sm font-medium" for="password">Password</label>
+
             <div class="relative">
+              <!-- Lock Icon -->
               <span class="absolute inset-y-0 left-0 flex items-center pl-2.5">
                 <i class="bx bx-lock-alt text-gray-400"></i>
               </span>
+
+              <!-- Password Input -->
               <input 
-                v-model="form.password" 
-                type="password" 
-                id="password" 
-                name="password" 
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                id="password"
+                name="password"
                 placeholder="Enter your password"
                 required
-                class="w-full pl-10 pr-3 py-2.5 rounded-lg bg-gray-100 border-transparent focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none text-sm transition"
+                class="w-full pl-10 pr-10 py-2.5 rounded-lg bg-gray-100 border-transparent focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:outline-none text-sm transition"
               />
+
+              <!-- Eye Icon -->
+              <span
+                class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                @click="showPassword = !showPassword"
+              >
+                <i
+                  :class="showPassword ? 'bx bx-show' : 'bx bx-hide'"
+                  class="text-gray-500 text-lg"
+                ></i>
+              </span>
             </div>
           </div>
 
           <!-- Remember Me & Forgot Password -->
-          <div class="flex items-center justify-between text-xs">
+          <!-- <div class="flex items-center justify-between text-xs">
             <label class="flex items-center space-x-1 text-gray-600 cursor-pointer">
               <input type="checkbox" class="form-checkbox h-3 w-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
               <span>Remember me</span>
             </label>
             <a href="#" class="text-blue-600 hover:underline font-medium text-xs">Forgot password?</a>
-          </div>
+          </div> -->
 
           <!-- Login Button -->
           <button 
@@ -120,6 +135,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { authStore } from '../../stores/auth'
+
+const showPassword = ref(false)
 
 const router = useRouter()
 const form = ref({

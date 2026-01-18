@@ -1,8 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { authStore } from '../stores/auth'
+import { permissionsStore } from '../stores/permissions'
+import { showErrorAlert } from '../utils/sweetAlert'
 
 // Dashboard routes
-import Dashboard from '../Pages/dashboard.vue'
+import Dashboard from '../pages/dashboard.vue'
 
 // Login Register routes
 import Login from '../pages/auth/Login.vue'
@@ -113,6 +115,7 @@ import DesignationsEdit from '../pages/designations/Edit.vue'
 import StaffsIndex from '../pages/staffs/Index.vue'
 import StaffsCreate from '../pages/staffs/Create.vue'
 import StaffsEdit from '../pages/staffs/Edit.vue'
+import StaffsIdCardShow from '../pages/staffs/IdCardShow.vue'
 
 // attendance routes
 import AttendanceIndex from '../pages/attendance/Index.vue'
@@ -157,6 +160,22 @@ import ClassRoutineShow from '../pages/class-routines/Show.vue'
 // Student Attendance routes
 import StudentAttendanceIndex from '../pages/student-attendance/Index.vue'
 import StudentAttendanceCreate from '../pages/student-attendance/Create.vue'
+
+// User Role routes
+import UserRoleIndex from '../pages/user-roles/Index.vue'
+import UserRoleCreate from '../pages/user-roles/Create.vue'
+import UserRoleEdit from '../pages/user-roles/Edit.vue'
+
+// Users routes
+import UsersIndex from '../pages/users/Index.vue'
+import UsersCreate from '../pages/users/Create.vue'
+import UsersEdit from '../pages/users/Edit.vue'
+import UserSettingsEdit from '../pages/users/UserSettings.vue'
+
+// User Role routes
+import CardTemplateIndex from '../pages/card-templates/Index.vue'
+import CardTemplateCreate from '../pages/card-templates/Create.vue'
+import CardTemplateEdit from '../pages/card-templates/Edit.vue'
 
 const routes = [
   { 
@@ -635,6 +654,14 @@ const routes = [
     props: true,
     meta: { requiresAuth: true }
   },
+  
+  {
+    path: '/staffs/:id/id-card',
+    name: 'staffs.idcardshow',
+    component: StaffsIdCardShow,
+    props: true,
+    meta: { requiresAuth: true }
+  },
 
   // Attendence
   {
@@ -811,6 +838,76 @@ const routes = [
     component: StudentAttendanceCreate,
     meta: { requiresAuth: true }
   },
+
+  //User Role routes
+  {
+    path: '/user-roles',
+    name: 'user-roles.index',
+    component: UserRoleIndex,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/user-roles/create',
+    name: 'user-roles.create',
+    component: UserRoleCreate,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/user-roles/:id/edit',
+    name: 'user-roles.edit',
+    component: UserRoleEdit,
+    props: true,
+    meta: { requiresAuth: true }
+  },
+
+  //Users routes
+  {
+    path: '/users',
+    name: 'users.index',
+    component: UsersIndex,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/users/create',
+    name: 'users.create',
+    component: UsersCreate,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/users/:id/edit',
+    name: 'users.edit',
+    component: UsersEdit,
+    props: true,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/user/settings',
+    name: 'user.settings',
+    component: UserSettingsEdit,
+    props: true,
+    meta: { requiresAuth: true }
+  },
+
+  // Card Templates routes
+  {
+    path: '/card-templates',
+    name: 'card-templates.index',
+    component: CardTemplateIndex,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/card-templates/create',
+    name: 'card-templates.create',
+    component: CardTemplateCreate,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/card-templates/:id/edit',
+    name: 'card-templates.edit',
+    component: CardTemplateEdit,
+    props: true,
+    meta: { requiresAuth: true }
+  },
   
 
 ]
@@ -820,16 +917,56 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const isAuthenticated = authStore.state.isAuthenticated
 
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/login')
-  } else if (to.meta.guest && isAuthenticated) {
-    next('/')
-  } else {
-    next()
+    return next('/login')
+  } 
+  
+  if (to.meta.guest && isAuthenticated) {
+    return next('/')
   }
-})
+
+  if (isAuthenticated && to.meta.requiresAuth && to.name !== 'dashboard' && to.name !== 'user.settings') {
+    
+    if (!permissionsStore.state.isLoaded) {
+      try {
+        await permissionsStore.fetchPermissions()
+      } catch (error) {
+        showErrorAlert('Error', 'Failed to load permissions')
+        return next('/login')
+      }
+    }
+
+
+    const hasPermission = permissionsStore.hasPermission(to.name)
+    
+    if (!hasPermission) {
+      //console.warn(`❌ Access denied to route: ${to.name}`)
+      
+      showErrorAlert(
+        'Unauthorized',
+        'You are not authorized to access this content.'
+      )
+      
+      return next({ name: 'dashboard' })
+    } 
+  }
+
+  next()
+})  
+
+// router.beforeEach((to, from, next) => {
+//   const isAuthenticated = authStore.state.isAuthenticated
+
+//   if (to.meta.requiresAuth && !isAuthenticated) {
+//     next('/login')
+//   } else if (to.meta.guest && isAuthenticated) {
+//     next('/')
+//   } else {
+//     next()
+//   }
+// })
 
 export default router

@@ -377,54 +377,30 @@ const currentPage = ref(1)
 const itemsPerPage = ref(10)
 const openDropdownId = ref(null)
 
-// Fetch all school settings
 const fetchSchoolSettings = async () => {
   try {
     loading.value = true
-    console.log('Fetching all school settings...')
     
     const response = await axios.get('/api/school-settings')
-    console.log('All school settings response:', response.data)
     
-    if (Array.isArray(response.data)) {
-      schools.value = response.data.map(school => ({
-        ...school,
-        logo_url: school.logo ? `/assets/images/school_logo/${school.logo}` : null
-      }))
-    } else if (response.data && Array.isArray(response.data.data)) {
-      schools.value = response.data.data.map(school => ({
-        ...school,
-        logo_url: school.logo ? `/assets/images/school_logo/${school.logo}` : null
-      }))
-    } else if (response.data) {
-      // If single object, convert to array
-      schools.value = [{
-        ...response.data,
-        logo_url: response.data.logo ? `/assets/images/school_logo/${response.data.logo}` : null
-      }]
-    } else {
-      schools.value = []
+    if (response.data.success && response.data.data) {
+      const data = response.data.data
+      
+      if (data.id && !Array.isArray(data)) {
+        schools.value = [data] 
+      } 
+      else if (Array.isArray(data)) {
+        schools.value = data
+      }
     }
-    
-    console.log(`Loaded ${schools.value.length} schools`)
     
   } catch (error) {
-    console.error('Error fetching school settings:', error)
-    console.error('Error details:', error.response)
-    
-    if (error.response?.status === 404) {
-      console.log('No school settings found')
-      schools.value = []
-    } else if (error.response?.status === 500) {
-      showErrorAlert('Error', 'Server error. Please try again later.')
-    } else {
-      showErrorAlert('Error', 'Failed to load school settings. Please check your connection.')
-    }
+    console.error('Error:', error)
+    schools.value = []
   } finally {
     loading.value = false
   }
 }
-
 // Delete school
 const deleteSchool = async (id) => {
   const result = await showConfirmDialog(

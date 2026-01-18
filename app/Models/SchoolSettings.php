@@ -15,7 +15,7 @@ class SchoolSettings extends Model
         'mobile_number',
         'email',
         'logo',
-        'school_id',
+        'sms_balance',
     ];
     
     protected $casts = [

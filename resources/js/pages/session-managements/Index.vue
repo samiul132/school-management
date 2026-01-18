@@ -19,7 +19,7 @@
           <button
             @click="openCreateModal"
             class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 
-                    text-white px-4 py-2.5 rounded-lg font-semibold transition-colors"
+                    text-white px-4 py-2.5 rounded-lg font-semibold transition-colors cursor-pointer"
           >
             <i class="fas fa-plus"></i>
             New Session
@@ -101,8 +101,7 @@
         <table class="w-full min-w-[800px]">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">ID</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Order</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">SL</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">Session Name</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Status</th>
@@ -112,10 +111,6 @@
           </thead>
           <tbody class="divide-y divide-gray-200">
             <tr v-for="session in filteredSessions" :key="session.id" class="hover:bg-gray-50">
-              <!-- ID -->
-              <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800 font-mono">
-                {{ session.id }}
-              </td>
               
               <!-- Order Number -->
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
@@ -414,8 +409,7 @@ const fetchSessions = async () => {
     loading.value = true
     const response = await axios.get('/api/session-managements')
     
-    // Debugging জন্য
-    console.log('Sessions API Response:', response.data)
+    // console.log('Sessions API Response:', response.data)
     
     if (response.data.success && Array.isArray(response.data.data)) {
       sessions.value = response.data.data
@@ -452,7 +446,6 @@ const createSession = async () => {
     
     closeAlert()
     
-    // Response structure check করুন
     if (response.data.message || response.data.success) {
       const newSession = response.data.data || response.data
       sessions.value.unshift(newSession)

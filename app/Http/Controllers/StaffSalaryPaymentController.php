@@ -162,6 +162,7 @@ class StaffSalaryPaymentController extends Controller
             $transation->transaction_type = 'SALARY_PAYMENT';
             $transation->voucher_type = 'DEBIT';
             $transation->account_id = $request->acc_id;
+            $transation->description = 'Salary Payment';
             $transation->amount = $salaryPayment->total_paid;
             $transation->reference_id = $salaryPayment->id;
             $transation->save();
@@ -283,6 +284,7 @@ class StaffSalaryPaymentController extends Controller
             $transation->transaction_type = 'SALARY_PAYMENT';
             $transation->voucher_type = 'DEBIT';
             $transation->account_id = $request->acc_id;
+            $transation->description = 'Salary Payment';
             $transation->amount = $salaryPayment->total_paid;
             $transation->reference_id = $salaryPayment->id;
             $transation->save();

@@ -140,7 +140,7 @@
         <table class="w-full min-w-[1200px]">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">SL</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Date</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">Voucher Type</th>
@@ -157,7 +157,7 @@
             <tr v-for="voucher in paginatedVouchers" :key="voucher.id" class="hover:bg-gray-50">
               <!-- ID -->
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800 font-mono">
-                {{ voucher.id }}
+                {{ getRowNumber(voucher) }}
               </td>
               
               <!-- Actions -->
@@ -499,16 +499,16 @@ const hasMorePages = computed(() => {
 const fetchVouchers = async () => {
   try {
     loading.value = true
-    console.log('Fetching vouchers...')
+    // console.log('Fetching vouchers...')
     const response = await axios.get('/api/vouchers')
-    console.log('Vouchers API response:', response.data)
+    // console.log('Vouchers API response:', response.data)
     
-    if (response.data.length > 0) {
-      console.log('First voucher data:', response.data[0])
-      console.log('Account data:', response.data[0].account)
-      console.log('Subsidiary data:', response.data[0].subsidiary)
-      console.log('Head data:', response.data[0].head)
-    }
+    // if (response.data.length > 0) {
+    //   console.log('First voucher data:', response.data[0])
+    //   console.log('Account data:', response.data[0].account)
+    //   console.log('Subsidiary data:', response.data[0].subsidiary)
+    //   console.log('Head data:', response.data[0].head)
+    // }
     
     vouchers.value = response.data
   } catch (error) {
@@ -632,6 +632,11 @@ const handleClickOutside = (event) => {
   if (!event.target.closest('.relative')) {
     openDropdownId.value = null
   }
+}
+
+const getRowNumber = (voucher) => {
+  const index = filteredVouchers.value.findIndex(s => s.id === voucher.id)
+  return index + 1
 }
 
 watch([search, voucherTypeFilter, dateFrom, dateTo], () => {

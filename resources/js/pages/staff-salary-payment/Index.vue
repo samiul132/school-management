@@ -12,7 +12,7 @@
       <router-link 
         :to="{ name: 'staff-salary-payment.create' }"
         class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 
-            text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-md w-full md:w-auto"
+            text-white px-3 py-2 rounded-lg font-semibold transition-colors shadow-md w-full md:w-auto"
       >
         <i class="fas fa-plus"></i>
         Create Payment
@@ -57,18 +57,71 @@
         <table class="w-full">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Date</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Salary Sheet</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Paid</th>
-              <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SL</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Date</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Salary Sheet</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Paid</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
             <tr v-for="payment in paginatedPayments" :key="payment.id" class="hover:bg-gray-50 transition-colors">
               <!-- ID -->
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="text-sm font-medium text-gray-900">#{{ payment.id }}</span>
+              <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800 font-mono">
+                {{ getRowNumber(payment) }}
+              </td>
+
+              <!-- Actions  -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div class="relative">
+                  <!-- Dropdown Button -->
+                  <button 
+                    @click.stop="toggleDropdown(payment.id)"
+                    class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg transition-colors gap-1 cursor-pointer"
+                    :class="{
+                      'bg-blue-600 text-white': openDropdownId !== payment.id,
+                      'bg-gray-200 text-black': openDropdownId === payment.id
+                    }"
+                  >
+                    Actions
+                    <i 
+                      class="fas fa-chevron-down text-xs transition-transform duration-200 ml-1"
+                      :class="{
+                        'rotate-180': openDropdownId === payment.id,
+                        'text-white': openDropdownId !== payment.id,
+                        'text-black': openDropdownId === payment.id
+                      }"
+                    ></i>
+                  </button>
+                  
+                  <!-- Dropdown Menu -->
+                  <div 
+                    v-if="openDropdownId === payment.id"
+                    class="absolute left-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 z-10"
+                    @click.stop
+                  >
+                    <div class="py-1">
+                      <!-- Edit Option -->
+                      <router-link
+                        :to="{ name: 'staff-salary-payment.edit', params: { id: payment.id } }"
+                        @click="closeDropdown"
+                        class="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        <i class="fas fa-edit text-blue-600 text-xs w-4"></i>
+                        <span>Edit</span>
+                      </router-link>
+                      
+                      <!-- Delete Option -->
+                      <button 
+                        @click="handleDeletePayment(payment.id)"
+                        class="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 transition-colors text-left"
+                      >
+                        <i class="fas fa-trash text-xs w-4"></i>
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </td>
 
               <!-- Date -->
@@ -86,42 +139,6 @@
               <!-- Total Paid -->
               <td class="px-6 py-4 whitespace-nowrap text-left">
                 <span class="text-sm font-semibold text-green-700">৳{{ formatCurrency(payment.total_paid) }}</span>
-              </td>
-
-              <!-- Actions -->
-              <td class="px-6 py-4 whitespace-nowrap text-center">
-                <div class="relative inline-block">
-                  <button
-                    @click.stop="toggleDropdown(payment.id)"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-sm font-medium"
-                  >
-                    Actions
-                    <i class="fas fa-chevron-down text-xs"></i>
-                  </button>
-
-                  <!-- Dropdown Menu -->
-                  <div
-                    v-show="openDropdownId === payment.id"
-                    class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50"
-                  >
-                    <router-link
-                      :to="{ name: 'staff-salary-payment.edit', params: { id: payment.id } }"
-                      class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
-                      @click="closeDropdown"
-                    >
-                      <i class="fas fa-edit w-4"></i>
-                      <span>Edit</span>
-                    </router-link>
-
-                    <button
-                      @click="handleDeletePayment(payment.id)"
-                      class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                    >
-                      <i class="fas fa-trash w-4"></i>
-                      <span>Delete</span>
-                    </button>
-                  </div>
-                </div>
               </td>
             </tr>
           </tbody>
@@ -386,6 +403,11 @@ const handleClickOutside = (event) => {
   if (!event.target.closest('.relative')) {
     openDropdownId.value = null
   }
+}
+
+const getRowNumber = (payment) => {
+  const index = filteredPayments.value.findIndex(s => s.id === payment.id)
+  return index + 1
 }
 
 watch([search], () => {

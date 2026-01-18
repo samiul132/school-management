@@ -523,7 +523,6 @@ const fetchDropdownData = async () => {
       classes.value = response.data.data.classes || []
       sections.value = response.data.data.sections || []
       
-      // Auto-select active session
       const activeSession = response.data.data.active_session
       if (activeSession && activeSession.id) {
         filters.value.session_id = activeSession.id
@@ -543,14 +542,12 @@ const fetchWavers = async (page = 1) => {
       per_page: perPage.value
     }
     
-    // Add filter parameters if they exist
     if (filters.value.session_id) params.session_id = filters.value.session_id
     if (filters.value.version_id) params.version_id = filters.value.version_id
     if (filters.value.class_id) params.class_id = filters.value.class_id
     if (filters.value.section_id) params.section_id = filters.value.section_id
     if (filters.value.roll) params.roll = filters.value.roll
     
-    // Handle ID Card Number search differently
     if (filters.value.id_card_number) {
       params.student_id_card = filters.value.id_card_number
     }
@@ -558,7 +555,6 @@ const fetchWavers = async (page = 1) => {
     const response = await axios.get('/api/wavers', { params })
     
     if (response.data.success) {
-      // Update pagination info
       const data = response.data.data
       paginationInfo.value = {
         current_page: data.current_page || 1,
@@ -568,10 +564,8 @@ const fetchWavers = async (page = 1) => {
         total: data.total || 0
       }
       
-      // Fix image paths
       const waversData = data.data || []
       
-      // Apply client-side filtering for ID card if backend doesn't support it
       let filteredWavers = waversData
       
       if (filters.value.id_card_number) {
@@ -615,9 +609,7 @@ const fetchWavers = async (page = 1) => {
 }
 
 const applyFilters = () => {
-  // Validate filters
   if (!filters.value.id_card_number) {
-    // If no ID card, all other fields are required
     if (!filters.value.session_id || !filters.value.version_id || 
         !filters.value.class_id || !filters.value.section_id || !filters.value.roll) {
       validationError.value = 'Please fill all required fields (Session, Version, Class, Section, Roll) or search by ID Card Number'
@@ -679,7 +671,6 @@ const viewEditWavers = (classWiseStudentDataId) => {
 const handleDeleteStudent = async (studentGroup) => {
   closeDropdown()
   
-  // For now, using browser confirm
   const confirmed = confirm(
     `Are you sure you want to delete all ${studentGroup.total_wavers} waver(s) for ${studentGroup.student_name}? This action cannot be undone.`
   )
@@ -691,7 +682,6 @@ const handleDeleteStudent = async (studentGroup) => {
 
 const deleteStudentWavers = async (studentGroup) => {
   try {
-    // Delete all wavers for this student
     const deletePromises = studentGroup.wavers.map(waver => 
       axios.delete(`/api/wavers/${waver.id}`)
     )
@@ -700,7 +690,6 @@ const deleteStudentWavers = async (studentGroup) => {
     
     alert(`Successfully deleted ${studentGroup.total_wavers} waver(s) for ${studentGroup.student_name}`)
     
-    // Refresh the list
     fetchWavers(currentPage.value)
   } catch (error) {
     console.error('Error deleting wavers:', error)

@@ -27,7 +27,7 @@
 
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
       <div class="bg-white rounded-2xl shadow-lg p-3 border border-gray-100">
         <div class="flex items-center justify-between">
           <div>
@@ -60,18 +60,6 @@
           </div>
           <div class="w-12 h-12 rounded-xl bg-purple-500 flex items-center justify-center">
             <i class="fas fa-chart-line text-white text-xl"></i>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl shadow-lg p-3 border border-gray-100">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-gray-500 text-sm font-medium">Showing</p>
-            <p class="text-3xl font-bold text-orange-600">{{ showingCount }}</p>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-orange-500 flex items-center justify-center">
-            <i class="fas fa-list text-white text-xl"></i>
           </div>
         </div>
       </div>
@@ -126,7 +114,7 @@
         <table class="w-full min-w-[1000px]">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">SL</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">Account Name</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">Opening Balance</th>
@@ -140,7 +128,7 @@
             <tr v-for="account in paginatedAccounts" :key="account.id" class="hover:bg-gray-50">
               <!-- ID -->
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800 font-mono">
-                {{ account.id }}
+                {{ getRowNumber(account) }}
               </td>
               
               <!-- Actions -->
@@ -447,9 +435,9 @@ const hasMorePages = computed(() => {
 const fetchAccounts = async () => {
   try {
     loading.value = true
-    console.log('Fetching cash/bank accounts...')
+    // console.log('Fetching cash/bank accounts...')
     const response = await axios.get('/api/cash-banks')
-    console.log('Accounts data:', response.data)
+    // console.log('Accounts data:', response.data)
     accounts.value = response.data
   } catch (error) {
     console.error('Error fetching accounts:', error)
@@ -529,32 +517,9 @@ const formatTime = (dateString) => {
 const formatCurrency = (amount) => {
   const numAmount = parseFloat(amount || 0)
   return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'BDT',
-    currencyDisplay: 'symbol',
-    minimumFractionDigits: 2
-  })
-    .format(numAmount)
-    .replace('BDT', '৳') // Force replace symbol to ৳
-}
-
-
-const formatAccountType = (type) => {
-  if (!type) return 'Unknown'
-  return type.charAt(0).toUpperCase() + type.slice(1)
-}
-
-const getAccountTypeClass = (type) => {
-  switch (type?.toLowerCase()) {
-    case 'cash':
-      return 'bg-green-100 text-green-800'
-    case 'bank':
-      return 'bg-blue-100 text-blue-800'
-    case 'digital':
-      return 'bg-purple-100 text-purple-800'
-    default:
-      return 'bg-gray-100 text-gray-800'
-  }
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  }).format(numAmount) + ' /='
 }
 
 const getBalanceColor = (balance) => {
@@ -578,7 +543,6 @@ const getBalanceStatusClass = (balance) => {
   return 'bg-gray-100 text-gray-800'
 }
 
-// Pagination methods
 const goToPage = (page) => {
   currentPage.value = page
 }
@@ -595,7 +559,6 @@ const previousPage = () => {
   }
 }
 
-// Close dropdown when clicking outside
 const handleClickOutside = (event) => {
   if (!event.target.closest('.relative')) {
     openDropdownId.value = null
@@ -610,6 +573,11 @@ watch([search, balanceFilter], () => {
 watch(itemsPerPage, () => {
   currentPage.value = 1
 })
+
+const getRowNumber = (account) => {
+  const index = filteredAccounts.value.findIndex(s => s.id === account.id)
+  return index + 1
+}
 
 // Lifecycle
 onMounted(() => {

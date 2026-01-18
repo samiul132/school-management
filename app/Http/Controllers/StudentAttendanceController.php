@@ -223,7 +223,12 @@ class StudentAttendanceController extends Controller
             DB::beginTransaction();
 
             try {
-                StudentAttendance::where('date', $request->date)->delete();
+                $studentIds = array_column($request->attendance, 'class_wise_student_id');
+
+                StudentAttendance::where('date', $request->date)
+                    ->whereIn('class_wise_student_id', $studentIds)
+                    ->delete();
+                //StudentAttendance::where('date', $request->date)->delete();
 
                 foreach ($request->attendance as $record) {
                     $inTime = isset($record['in_time']) && $record['in_time'] 

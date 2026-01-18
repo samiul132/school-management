@@ -1,5 +1,6 @@
 import { reactive } from 'vue'
 import axios from 'axios'
+import { permissionsStore } from './permissions'
 
 const state = reactive({
   user: null,
@@ -19,6 +20,9 @@ export const authStore = {
       await axios.get('/sanctum/csrf-cookie')
       const response = await axios.post('/api/login', credentials)
       this.setAuth(response.data)
+
+      await permissionsStore.fetchPermissions()
+
       return response.data
     } catch (error) {
       throw error
@@ -30,6 +34,9 @@ export const authStore = {
       await axios.get('/sanctum/csrf-cookie')
       const response = await axios.post('/api/register', userData)
       this.setAuth(response.data)
+
+      await permissionsStore.fetchPermissions()
+
       return response.data
     } catch (error) {
       throw error
@@ -43,6 +50,9 @@ export const authStore = {
       console.error('Logout error:', error)
     } finally {
       this.clearAuth()
+
+      await permissionsStore.fetchPermissions()
+
     }
   },
 
@@ -54,6 +64,21 @@ export const authStore = {
     } catch (error) {
       this.clearAuth()
       throw error
+    }
+  },
+  // User Role Auth Check
+  async checkAuth() {
+    if (state.token && state.isAuthenticated) {
+      try {
+        await this.fetchUser()
+        
+        if (!permissionsStore.state.isLoaded) {
+          await permissionsStore.fetchPermissions()
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error)
+        this.clearAuth()
+      }
     }
   },
 
@@ -80,6 +105,7 @@ axios.interceptors.response.use(
   error => {
     if (error.response?.status === 401) {
       authStore.clearAuth()
+      permissionsStore.clearPermissions()
       window.location.href = '/login'
     }
     return Promise.reject(error)

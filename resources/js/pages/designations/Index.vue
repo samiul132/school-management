@@ -53,7 +53,7 @@
         <table class="w-full min-w-[800px]">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">SL</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">Designation Name</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">Created At</th>
@@ -62,8 +62,9 @@
           </thead>
           <tbody class="divide-y divide-gray-200">
             <tr v-for="designation in paginatedDesignations" :key="designation.id" class="hover:bg-gray-50">
+              
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800 font-mono">
-                {{ designation.id }}
+                {{ getRowNumber(designation) }}
               </td>
               
               <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
@@ -292,9 +293,9 @@ const hasMorePages = computed(() => {
 const fetchDesignations = async () => {
   try {
     loading.value = true
-    console.log('Fetching Designations...')
+    //console.log('Fetching Designations...')
     const response = await axios.get('/api/designations')
-    console.log('Designation data:', response.data)
+    //console.log('Designation data:', response.data)
 
     designations.value = response.data.data
   } catch (error) {
@@ -352,6 +353,11 @@ const deleteDesignations = async (id) => {
 const handleDeleteDesignations = async (id) => {
   closeDropdown()
   await deleteDesignations(id)
+}
+
+const getRowNumber = (designation) => {
+  const index = filteredDesignations.value.findIndex(s => s.id === designation.id)
+  return index + 1
 }
 
 const toggleDropdown = (id) => {

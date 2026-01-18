@@ -24,7 +24,7 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="flex justify-center items-center py-20">
+    <div v-if="loading || templateLoading" class="flex justify-center items-center py-20">
       <i class="fas fa-spinner fa-spin text-3xl text-blue-600"></i>
     </div>
 
@@ -32,7 +32,10 @@
     <div v-else-if="student" class="flex flex-col items-center gap-8 print:flex-row print:gap-4 print:justify-center">
       <!-- Front Side -->
       <div class="id-card">
-        <div class="id-card-inner front">
+        <div 
+          class="id-card-inner front"
+          :style="cardBackgroundStyle"
+        >
           <!-- School Logo -->
           <div class="logo-container">
             <img 
@@ -171,10 +174,13 @@ const schoolStore = useSchoolStore()
 
 const student = ref(null)
 const loading = ref(true)
+const templateLoading = ref(true)
+const cardTemplate = ref(null)
 
 // Fetch school settings
 onMounted(async () => {
   await schoolStore.fetchSchoolSettings()
+  await fetchCardTemplate()
   await fetchStudent()
 })
 
@@ -187,6 +193,42 @@ const schoolLogo = computed(() => {
   }
   return '/assets/favicon.png'
 })
+
+const cardBackgroundStyle = computed(() => {
+  if (cardTemplate.value?.student_image_url) {
+    return {
+      backgroundImage: `url(${cardTemplate.value.student_image_url})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    }
+  }
+  // Fallback to default image
+  return {
+    backgroundImage: 'url(/assets/img/student_id_card_bg.png)',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat'
+  }
+})
+
+// Fetch card template
+const fetchCardTemplate = async () => {
+  try {
+    templateLoading.value = true
+    const response = await axios.get('/api/card-templates')
+    
+    if (response.data.success && response.data.data.length > 0) {
+      // First template nibo - apni logic change korte paren
+      cardTemplate.value = response.data.data[0]
+    }
+  } catch (error) {
+    console.error('Error fetching card template:', error)
+    // Template na paile default background use hobe
+  } finally {
+    templateLoading.value = false
+  }
+}
 
 // Fetch student data
 const fetchStudent = async () => {
@@ -234,7 +276,6 @@ const getVersionName = (student) => {
   return 'N/A'
 }
 
-// Print function
 const printCard = () => {
   window.print()
 }
@@ -249,14 +290,16 @@ const printCard = () => {
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  color-adjust: exact !important;
 }
 
 .id-card-inner {
   width: 100%;
   height: 100%;
-  padding: 10px;
+  padding: 7px;
   position: relative;
-  background: white;
 }
 
 /* Front Side Styles */
@@ -264,6 +307,30 @@ const printCard = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  /* background-image: url('/assets/img/student_id_card_bg.png'); */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  color-adjust: exact !important;
+}
+
+.front::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.05); 
+  z-index: 0;
+}
+
+.front > * {
+  position: relative;
+  z-index: 1;
 }
 
 .logo-container {
@@ -271,36 +338,34 @@ const printCard = () => {
 }
 
 .school-logo {
-  height: 30px;
+  height: 40px;
   width: auto;
   object-fit: contain;
 }
 
 .school-name {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: bold;
   text-align: center;
-  color: #1f2937;
+  color: #fff;
+  margin-top: -2px;
   margin-bottom: 4px;
   line-height: 1.2;
   padding: 0 4px;
 }
 
 .card-title {
-  font-size: 9px;
+  font-size: 12px;
   font-weight: bold;
-  color: #667eea;
-  background: #e0e7ff;
-  padding: 3px 14px;
-  border-radius: 4px;
+  color: #fff;
   margin-bottom: 8px;
 }
 
 .student-photo-container {
-  width: 80px;
-  height: 95px;
-  border: 1px solid #667eea;
-  border-radius: 6px;
+  width: 90px;
+  height: 90px;
+  border: 1px solid #0f4c1d;
+  border-radius: 50%;
   overflow: hidden;
   margin-bottom: 8px;
   background: #f3f4f6;
@@ -325,6 +390,7 @@ const printCard = () => {
   width: 100%;
   font-size: 8px;
   line-height: 1.5;
+  margin-left: 50px;
 }
 
 .detail-row {
@@ -335,20 +401,20 @@ const printCard = () => {
 
 .detail-label {
   font-weight: 600;
-  color: #4b5563;
-  width: 48px;
+  color: #000000;
+  width: 35px;
   flex-shrink: 0;
 }
 
 .detail-value {
-  color: #1f2937;
+  color: #000000;
   font-weight: 500;
   flex: 1;
 }
 
 .signature {
   position: absolute;
-  bottom: 8px;
+  bottom: 4px;
   right: 14px;
   text-align: center;
 }
@@ -356,13 +422,13 @@ const printCard = () => {
 .signature-line {
   width: auto;
   height: 1px;
-  background: #9ca3af;
+  background: #393d44;
   margin-bottom: 2px;
 }
 
 .signature-text {
   font-size: 7px;
-  color: #6b7280;
+  color: #fff;
 }
 
 /* Back Side Styles */
@@ -372,6 +438,9 @@ const printCard = () => {
   align-items: center;
   padding: 12px 14px;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  color-adjust: exact !important;
 }
 
 .lost-notice {
@@ -451,6 +520,12 @@ const printCard = () => {
 
 /* Print Styles */
 @media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
   body {
     margin: 0;
     padding: 0;
@@ -481,11 +556,9 @@ const printCard = () => {
   }
 
   /* Page setup for side by side printing */
-  /* A4 page settings */
   @page {
     margin: 0.5cm;
     size: A4 portrait !important;
   }
-  
 }
 </style>

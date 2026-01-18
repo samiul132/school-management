@@ -27,7 +27,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <!-- Main Form -->
       <div class="lg:col-span-2">
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100">
           <!-- Form Header -->
           <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-200">
             <div class="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center">
@@ -76,14 +76,27 @@
                     <div>
                       <label for="id_card_number" class="block text-sm font-medium text-gray-700 mb-2">
                         ID Card Number
+                        <span v-if="loadingNextId" class="text-blue-600 text-xs ml-2">
+                          <i class="fas fa-spinner fa-spin"></i> Generating...
+                        </span>
                       </label>
-                      <input
-                        type="text"
-                        id="id_card_number"
-                        v-model="form.id_card_number"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-800"
-                        placeholder="Enter ID card number"
-                      />
+                      <div class="relative">
+                        <input
+                          type="text"
+                          id="id_card_number"
+                          v-model="form.id_card_number"
+                          readonly
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 cursor-not-allowed"
+                          :placeholder="loadingNextId ? 'Generating ID...' : 'Auto-generated ID'"
+                        />
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                          <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                      </div>
+                      <p class="mt-1 text-xs text-gray-500">
+                        <i class="fas fa-info-circle"></i> 
+                         ID will be generated automatically
+                      </p>
                     </div>
                   </div>
 
@@ -1173,6 +1186,27 @@ const permanentUpazilas = ref([])
 const studentImagePreview = ref(null)
 const tcImagePreview = ref(null)
 
+// School ID
+const nextStudentId = ref('')
+const loadingNextId = ref(false)
+
+// fetchNextStudentId 
+const fetchNextStudentId = async () => {
+  loadingNextId.value = true
+  try {
+    const response = await axios.get('/api/school-settings/next-student-id')
+    if (response.data.success) {
+      nextStudentId.value = response.data.student_id
+      form.id_card_number = response.data.student_id
+    }
+  } catch (error) {
+    console.error('Failed to fetch next student ID:', error)
+    showErrorAlert('Error', 'Could not generate student ID. You can enter manually.')
+  } finally {
+    loadingNextId.value = false
+  }
+}
+
 // Selected items for display
 const selectedClass = computed(() => {
   return dropdownData.classes.find(cls => cls.id === form.academic_data.class_id) || null
@@ -1609,6 +1643,7 @@ watch(() => form.permanent_district_id, (newDistrictId, oldDistrictId) => {
 onMounted(() => {
   fetchDropdownData()
   fetchDistricts()
+  fetchNextStudentId()
 })
 </script>
 

@@ -94,7 +94,7 @@
             <tr v-for="staff in paginatedStaffs" :key="staff.id" class="hover:bg-gray-50">
               <!-- ID -->
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800 font-mono">
-                {{ staff.id }}
+                {{ getRowNumber(staff) }}
               </td>
               
               <!-- Actions -->
@@ -132,6 +132,16 @@
                       >
                         <i class="fas fa-edit text-blue-600 text-xs w-4"></i>
                         <span>Edit Staff</span>
+                      </router-link>
+
+                      <!-- View Option -->
+                      <router-link 
+                        :to="{ name: 'staffs.idcardshow', params: { id: staff.id } }"
+                        class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                        @click="closeDropdown"
+                      >
+                        <i class="fas fa-eye text-green-600 text-xs w-4"></i>
+                        <span>View Id card</span>
                       </router-link>
                       
                       <button 
@@ -212,7 +222,7 @@
               <!-- Subsidiary -->
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
                 <span class="px-2 py-1 rounded-full text-xs">
-                  {{ staff.subsidiary.name }}
+                  {{ staff.subsidiary?.name || 'N/A' }}
                 </span>
               </td>
 
@@ -573,6 +583,11 @@ const handleClickOutside = (event) => {
   if (!event.target.closest('.relative')) {
     openDropdownId.value = null
   }
+}
+
+const getRowNumber = (staff) => {
+  const index = filteredStaffs.value.findIndex(s => s.id === staff.id)
+  return index + 1
 }
 
 watch([search, statusFilter], () => {

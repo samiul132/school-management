@@ -49,11 +49,17 @@ class MonthManagementController extends Controller
                 $orderNumber = $maxOrder ? $maxOrder + 1 : 1;
             }
 
-            $month = MonthManagement::create([
-                'month_name' => $request->month_name,
-                'order_number' => $orderNumber,
-                'status' => $request->status,
-            ]);
+            $month = new MonthManagement();
+            $month->month_name = $request->month_name;
+            $month->order_number = $request->order_number;
+            $month->status = $request->status;
+            $user->save();
+
+            // $month = MonthManagement::create([
+            //     'month_name' => $request->month_name,
+            //     'order_number' => $orderNumber,
+            //     'status' => $request->status,
+            // ]);
 
             return response()->json([
                 'message' => 'Month created successfully',

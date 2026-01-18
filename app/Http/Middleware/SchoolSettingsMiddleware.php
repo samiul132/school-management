@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -16,13 +17,15 @@ class SchoolSettingsMiddleware
             if ($user->school_id !== null) {
                 $schoolId = $user->school_id;
                 
-                $settings = SchoolSettings::where('school_id', $schoolId)->first();
+                $settings = SchoolSettings::find($schoolId);
                 
                 if (!$settings) {
                     $settings = SchoolSettings::create([
-                        'school_id' => $schoolId,
                         'school_name' => $user->name . ' School',
                     ]);
+                    
+                    $user->school_id = $settings->id;
+                    $user->save();
                 }
                 
                 if ($settings->logo) {
@@ -53,7 +56,6 @@ class SchoolSettingsMiddleware
                     $response->setData($data);
                 }
             } catch (\Exception $e) {
-                // ignore
             }
         }
         

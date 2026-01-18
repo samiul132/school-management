@@ -15,6 +15,18 @@ class SectionManagementController extends Controller
         try {
             $sections = SectionManagement::orderBy('created_at', 'desc')->get();
             
+            $sections = $sections->map(function($section) {
+                return [
+                    'id' => $section->id,
+                    'section_name' => $section->section_name,
+                    'class_id' => $section->class_id,
+                    'class_name' => $section->class ? $section->class->class_name : 'N/A',
+                    'status' => $section->status,
+                    'created_at' => $section->created_at,
+                    'updated_at' => $section->updated_at,
+                ];
+            });
+
             return response()->json($sections);
         } catch (\Exception $e) {
             Log::error('Error fetching sections: ' . $e->getMessage());
