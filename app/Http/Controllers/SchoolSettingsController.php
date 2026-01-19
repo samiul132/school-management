@@ -111,12 +111,13 @@ class SchoolSettingsController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        //dd($request->all());
         $validator = Validator::make($request->all(), [
             'school_name' => 'required|string|max:255',
             'address' => 'nullable|string|max:500',
             'mobile_number' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:100',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048'
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:1024'
         ]);
 
         try {
@@ -152,6 +153,17 @@ class SchoolSettingsController extends Controller
             $settings->email = $request->email;
             $settings->logo = $logoName;
             $settings->save();
+
+            $autoPassword = rand(10000000, 99999999);
+            
+            $user = new User();
+            $user->school_id = $settings->id;
+            $user->type = 'ADMIN';
+            $user->name = $request->school_name;
+            $user->email = $request->email;
+            $user->password = bcrypt($autoPassword);
+            //dd($user);
+            $user->save();
 
             if ($settings->logo) {
                 $settings->logo_url = asset('assets/images/school_logo/' . $settings->logo);
